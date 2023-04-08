@@ -1,0 +1,28 @@
+{
+  "name": "soundwave-backend",
+  "version": "0.1.0",
+  "description": "Backend for SoundWave project",
+  "main": "soundwave-backend.js",
+  "type": "module",
+  "scripts": {
+    "production": "pm2 start config/pm2.production.json",
+    "dev": "nodemon soundwave-backend.js --config config/nodemon.dev.json",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "keywords": [],
+  "author": "sergunu42",
+  "license": "BSL-1.0",
+  "dependencies": {
+    "pg": "^8.10.0",
+    "sequelize": "^6.30.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.37.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.2"
+  }
+}

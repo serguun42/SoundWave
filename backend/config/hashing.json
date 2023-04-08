@@ -1,0 +1,6 @@
+{
+  "iterations": 1000,
+  "key_length": 64,
+  "digest": "sha256",
+  "salt_length": 16
+}

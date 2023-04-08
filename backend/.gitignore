@@ -1,3 +1,8 @@
 .vscode/
 package-lock.json
 node_modules/
+
+out/
+
+config/*.dev.json
+!config/nodemon.dev.json
