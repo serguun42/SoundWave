@@ -14,20 +14,24 @@ const sequelize = new Sequelize({
 
 sequelize.authenticate().catch(LogMessageOrError);
 
-/** @typedef {import('sequelize').ModelCtor<import('sequelize').Model<any, any>>} ModelInstance */
-/** @type {{ [key in import('./declarations.js').ModelNames]: ModelInstance }} */
-const modelInstances = {};
-Object.keys(DECLARATIONS).forEach((modelName) => {
-  modelInstances[modelName] = sequelize.define(modelName, DECLARATIONS[modelName]);
-});
+/** @type {import('../types/db-models').ModelsCollection} */
+export const MODELS = {};
 
-/**
- * @returns {Promise<import('../types/db-models').UserDB[]>}
- */
-export const FindAllUsers = () => modelInstances.users.findAll();
+Object.keys(DECLARATIONS).forEach(
+  /** @param {import('../types/db-models').ModelNames} modelName */ (modelName) => {
+    const { tableName, attributes } = DECLARATIONS[modelName];
 
-/**
- * @param {string} username
- * @returns {Promise<import('../types/db-models').UserDB>}
- */
-export const FindUser = (username) => modelInstances.users.findOne({ where: { username } });
+    MODELS[modelName] = sequelize.define(tableName, attributes);
+  }
+);
+
+export const FindAllUsers = () => MODELS.UserDB.findAll();
+
+/** @param {string} username */
+export const FindUser = (username) => MODELS.UserDB.findOne({ where: { username } });
+
+export const FindAllTracks = () => MODELS.TrackDB.findAll();
+
+export const FindAllPlaylists = () => MODELS.PlaylistDB.findAll();
+
+export const FindAllPlaylistsTracks = () => MODELS.PlaylistTrackDB.findAll();
