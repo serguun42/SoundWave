@@ -23,6 +23,13 @@ const DECLARATIONS = {
         defaultValue: false,
       },
     },
+    associations: [
+      {
+        type: 'hasMany',
+        with: ['TrackDB', 'PlaylistDB', 'TrackLikeDB', 'PlaylistLikeDB'],
+        foreignKey: 'owner',
+      },
+    ],
   },
 
   TrackDB: {
@@ -45,6 +52,10 @@ const DECLARATIONS = {
       owner: {
         type: DataTypes.STRING(64),
         allowNull: false,
+        references: {
+          model: 'users',
+          key: 'username',
+        },
       },
       title: {
         type: DataTypes.STRING(255),
@@ -55,6 +66,24 @@ const DECLARATIONS = {
         allowNull: false,
       },
     },
+    associations: [
+      {
+        type: 'belongsTo',
+        with: 'UserDB',
+        foreignKey: 'owner',
+      },
+      {
+        type: 'hasMany',
+        with: ['PlaylistTrackDB', 'TrackLikeDB'],
+        foreignKey: 'track_uuid',
+      },
+      {
+        type: 'belongsToMany',
+        with: 'PlaylistDB',
+        through: 'PlaylistTrackDB',
+        foreignKey: 'track_uuid',
+      },
+    ],
   },
 
   PlaylistDB: {
@@ -73,12 +102,35 @@ const DECLARATIONS = {
       owner: {
         type: DataTypes.STRING(64),
         allowNull: false,
+        references: {
+          model: 'users',
+          key: 'username',
+        },
       },
       title: {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
     },
+    associations: [
+      {
+        type: 'belongsTo',
+        with: 'UserDB',
+        foreignKey: 'owner',
+      },
+      {
+        type: 'hasMany',
+        with: ['PlaylistTrackDB', 'PlaylistLikeDB'],
+        foreignKey: 'playlist_uuid',
+      },
+      {
+        type: 'belongsToMany',
+        with: 'TrackDB',
+        through: 'PlaylistTrackDB',
+        foreignKey: 'playlist_uuid',
+        as: 'tracks_for_full_playlist',
+      },
+    ],
   },
 
   PlaylistTrackDB: {
@@ -87,19 +139,44 @@ const DECLARATIONS = {
       playlist_uuid: {
         type: DataTypes.UUID,
         allowNull: false,
+        primaryKey: true,
         unique: 'track_unique_position',
+        references: {
+          model: 'playlists',
+          key: 'uuid',
+        },
       },
       track_uuid: {
         type: DataTypes.UUID,
         allowNull: false,
+        primaryKey: true,
         unique: 'track_unique_position',
+        references: {
+          model: 'tracks',
+          key: 'uuid',
+        },
       },
       position: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
+        primaryKey: true,
         unique: 'track_unique_position',
       },
     },
+    associations: [
+      {
+        type: 'belongsTo',
+        with: 'TrackDB',
+        foreignKey: 'track_uuid',
+        as: 'tracks_by_playlist',
+      },
+      {
+        type: 'belongsTo',
+        with: 'PlaylistDB',
+        foreignKey: 'playlist_uuid',
+        as: 'playlists_by_track',
+      },
+    ],
     noPrimaryKey: true,
   },
 
@@ -110,13 +187,33 @@ const DECLARATIONS = {
         type: DataTypes.UUID,
         allowNull: false,
         unique: 'track_like',
+        references: {
+          model: 'tracks',
+          key: 'uuid',
+        },
       },
       owner: {
         type: DataTypes.STRING(64),
         allowNull: false,
         unique: 'track_like',
+        references: {
+          model: 'users',
+          key: 'username',
+        },
       },
     },
+    associations: [
+      {
+        type: 'belongsTo',
+        with: 'TrackDB',
+        foreignKey: 'track_uuid',
+      },
+      {
+        type: 'belongsTo',
+        with: 'UserDB',
+        foreignKey: 'owner',
+      },
+    ],
     noPrimaryKey: true,
   },
 
@@ -127,13 +224,33 @@ const DECLARATIONS = {
         type: DataTypes.UUID,
         allowNull: false,
         unique: 'playlist_like',
+        references: {
+          model: 'playlists',
+          key: 'uuid',
+        },
       },
       owner: {
         type: DataTypes.STRING(64),
         allowNull: false,
         unique: 'playlist_like',
+        references: {
+          model: 'users',
+          key: 'username',
+        },
       },
     },
+    associations: [
+      {
+        type: 'belongsTo',
+        with: 'PlaylistDB',
+        foreignKey: 'playlist_uuid',
+      },
+      {
+        type: 'belongsTo',
+        with: 'UserDB',
+        foreignKey: 'owner',
+      },
+    ],
     noPrimaryKey: true,
   },
 };

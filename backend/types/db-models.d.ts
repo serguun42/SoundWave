@@ -30,7 +30,6 @@ export type PlaylistDB = {
 };
 
 export type PlaylistTrackDB = {
-  id: number;
   playlist_uuid: string;
   track_uuid: string;
   /** Position of track in the playlist */
@@ -43,11 +42,11 @@ export type TrackLikeDB = {
 };
 
 export type PlaylistLikeDB = {
-  track_uuid: string;
+  playlist_uuid: string;
   owner: string;
 };
 
-type ModelNamesToEntities = {
+export type ModelNamesToEntities = {
   UserDB: UserDB;
   TrackDB: TrackDB;
   PlaylistDB: PlaylistDB;
@@ -56,7 +55,7 @@ type ModelNamesToEntities = {
   PlaylistLikeDB: PlaylistLikeDB;
 };
 
-type ModelNamesToTableNames = {
+export type ModelNamesToTableNames = {
   UserDB: 'users';
   TrackDB: 'tracks';
   PlaylistDB: 'playlists';
@@ -68,6 +67,17 @@ type ModelNamesToTableNames = {
 export type ModelNames = keyof ModelNamesToEntities;
 type Model<TEntity> = import('sequelize').Model<TEntity, TEntity>;
 
+type TableNames = ModelNamesToTableNames[keyof ModelNamesToTableNames];
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+type Association = {
+  type: 'hasOne' | 'hasMany' | 'belongsTo' | 'belongsToMany';
+  with: ModelNames | ModelNames[];
+  foreignKey?: KeysOfUnion<ModelNamesToEntities[ModelNames]>;
+  through?: ModelNames;
+  as?: string;
+};
+
 export type ModelDeclarations = {
   [modelName in ModelNames]: {
     tableName: ModelNamesToTableNames[modelName];
@@ -75,6 +85,7 @@ export type ModelDeclarations = {
       Model<ModelNamesToEntities[modelName]>,
       ModelNamesToEntities[modelName]
     >;
+    associations?: Association[];
     noPrimaryKey?: boolean;
   };
 };
