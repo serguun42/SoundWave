@@ -84,25 +84,57 @@ const DECLARATIONS = {
   PlaylistTrackDB: {
     tableName: 'playlists_tracks',
     attributes: {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        allowNull: false,
-        autoIncrement: true,
-      },
       playlist_uuid: {
         type: DataTypes.UUID,
         allowNull: false,
+        unique: 'track_unique_position',
       },
       track_uuid: {
         type: DataTypes.UUID,
         allowNull: false,
+        unique: 'track_unique_position',
       },
       position: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
+        unique: 'track_unique_position',
       },
     },
+    noPrimaryKey: true,
+  },
+
+  TrackLikeDB: {
+    tableName: 'tracks_likes',
+    attributes: {
+      track_uuid: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        unique: 'track_like',
+      },
+      owner: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        unique: 'track_like',
+      },
+    },
+    noPrimaryKey: true,
+  },
+
+  PlaylistLikeDB: {
+    tableName: 'playlists_likes',
+    attributes: {
+      playlist_uuid: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        unique: 'playlist_like',
+      },
+      owner: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        unique: 'playlist_like',
+      },
+    },
+    noPrimaryKey: true,
   },
 };
 

@@ -15,7 +15,7 @@ export const CreateSalt = () => randomBytes(saltLength).toString('hex');
  * @param {string} salt
  * @returns {Promise<string>}
  */
-export const GetPasswordHash = (password, salt) =>
+export const HashPassword = (password, salt) =>
   new Promise((resolve, reject) => {
     pbkdf2(password, salt, iterations, keyLength, digest, (e, derivedKey) => {
       if (e) reject(e);

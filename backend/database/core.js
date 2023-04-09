@@ -14,24 +14,66 @@ const sequelize = new Sequelize({
 
 sequelize.authenticate().catch(LogMessageOrError);
 
-/** @type {import('../types/db-models').ModelsCollection} */
+/** @type {import('../types/db-models').ModelsDict} */
 export const MODELS = {};
 
 Object.keys(DECLARATIONS).forEach(
   /** @param {import('../types/db-models').ModelNames} modelName */ (modelName) => {
-    const { tableName, attributes } = DECLARATIONS[modelName];
+    const { tableName, attributes, noPrimaryKey } = DECLARATIONS[modelName];
 
     MODELS[modelName] = sequelize.define(tableName, attributes);
+    if (noPrimaryKey) MODELS[modelName].removeAttribute('id');
   }
 );
 
-export const FindAllUsers = () => MODELS.UserDB.findAll();
-
 /** @param {string} username */
-export const FindUser = (username) => MODELS.UserDB.findOne({ where: { username } });
+export const GetUser = (username) => MODELS.UserDB.findOne({ where: { username } });
 
-export const FindAllTracks = () => MODELS.TrackDB.findAll();
+/** @param {import('../types/db-models').UserDB} user */
+export const InsertUser = (user) => MODELS.UserDB.create(user);
 
-export const FindAllPlaylists = () => MODELS.PlaylistDB.findAll();
+/** @param {string} uuid */
+export const GetTrack = (uuid) => MODELS.TrackDB.findOne({ where: { uuid } });
 
-export const FindAllPlaylistsTracks = () => MODELS.PlaylistTrackDB.findAll();
+/**
+ * @param {string} owner
+ * @param {number} [skip]
+ * @param {number} [limit]
+ */
+export const FindOwnedTracks = (owner, skip = 0, limit = 100) =>
+  MODELS.TrackDB.findAll({ where: { owner }, limit, offset: skip });
+
+/** @param {string} uuid */
+export const GetPlaylist = (uuid) => MODELS.PlaylistDB.findOne({ where: { uuid } });
+
+/**
+ * @param {string} owner
+ * @param {number} [skip]
+ * @param {number} [limit]
+ */
+export const FindOwnedPlaylists = (owner, skip = 0, limit = 100) =>
+  MODELS.PlaylistDB.findAll({ where: { owner }, limit, offset: skip });
+
+/**
+ * @param {string} playlistUUID
+ * @param {number} [skip]
+ * @param {number} [limit]
+ */
+export const GetTracksInPlaylist = (playlistUUID, skip = 0, limit = 100) =>
+  MODELS.PlaylistTrackDB.findAll({ where: { playlist_uuid: playlistUUID }, limit, offset: skip });
+
+/**
+ * @param {string} owner
+ * @param {number} [skip]
+ * @param {number} [limit]
+ */
+export const FindLikedTracks = (owner, skip = 0, limit = 100) =>
+  MODELS.TrackLikeDB.findAll({ where: { owner }, limit, offset: skip });
+
+/**
+ * @param {string} owner
+ * @param {number} [skip]
+ * @param {number} [limit]
+ */
+export const FindLikedPlaylists = (owner, skip = 0, limit = 100) =>
+  MODELS.PlaylistLikeDB.findAll({ where: { owner }, limit, offset: skip });

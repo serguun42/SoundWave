@@ -37,11 +37,23 @@ export type PlaylistTrackDB = {
   position: number;
 };
 
+export type TrackLikeDB = {
+  track_uuid: string;
+  owner: string;
+};
+
+export type PlaylistLikeDB = {
+  track_uuid: string;
+  owner: string;
+};
+
 type ModelNamesToEntities = {
   UserDB: UserDB;
   TrackDB: TrackDB;
   PlaylistDB: PlaylistDB;
   PlaylistTrackDB: PlaylistTrackDB;
+  TrackLikeDB: TrackLikeDB;
+  PlaylistLikeDB: PlaylistLikeDB;
 };
 
 type ModelNamesToTableNames = {
@@ -49,24 +61,27 @@ type ModelNamesToTableNames = {
   TrackDB: 'tracks';
   PlaylistDB: 'playlists';
   PlaylistTrackDB: 'playlists_tracks';
+  TrackLikeDB: 'tracks_likes';
+  PlaylistLikeDB: 'playlists_likes';
 };
 
 export type ModelNames = keyof ModelNamesToEntities;
-
-type CreatingAttributes<T extends ModelNames> = import('sequelize').ModelAttributes<
-  import('sequelize').Model<ModelNamesToEntities[T], any>,
-  ModelNamesToEntities[T]
->;
+type Model<TEntity> = import('sequelize').Model<TEntity, TEntity>;
 
 export type ModelDeclarations = {
   [modelName in ModelNames]: {
     tableName: ModelNamesToTableNames[modelName];
-    attributes: CreatingAttributes<modelName>;
+    attributes: import('sequelize').ModelAttributes<
+      Model<ModelNamesToEntities[modelName]>,
+      ModelNamesToEntities[modelName]
+    >;
+    noPrimaryKey?: boolean;
   };
 };
 
-export type ModelsCollection = {
-  [modelName in ModelNames]: import('sequelize').ModelStatic<
-    import('sequelize').Model<ModelNamesToEntities[modelName], ModelNamesToEntities[modelName]>
-  >;
+export type ModelsDict = {
+  [modelName in ModelNames]: import('sequelize').ModelStatic<Model<ModelNamesToEntities[modelName]>>;
 };
+
+export type UnwrapEntity = (<TEntity>(model: Model<TEntity>) => TEntity) &
+  (<TEntity>(model: Model<TEntity>[]) => TEntity[]);
