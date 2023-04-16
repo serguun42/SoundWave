@@ -1,0 +1,6 @@
+{
+  "port": 6200,
+  "version": "1",
+  "minute_limit": 1000,
+  "hour_limit": 3000
+}

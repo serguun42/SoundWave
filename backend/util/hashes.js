@@ -1,7 +1,7 @@
 import { pbkdf2, randomBytes } from 'node:crypto';
-import { LoadHashingConfig } from './load-configs.js';
+import LoadConfig from './load-configs.js';
 
-const { iterations, key_length: keyLength, digest, salt_length: saltLength } = LoadHashingConfig();
+const { iterations, key_length: keyLength, digest, salt_length: saltLength } = LoadConfig('hashing');
 
 /**
  * Creates random HEX representation for new salt

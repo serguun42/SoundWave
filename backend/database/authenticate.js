@@ -1,10 +1,10 @@
 import { Sequelize } from 'sequelize';
-import { LoadDBConfig } from '../util/load-configs.js';
+import LoadConfig from '../util/load-configs.js';
 import LogMessageOrError from '../util/log.js';
 
 const sequelize = new Sequelize({
   dialect: 'postgres',
-  ...LoadDBConfig(),
+  ...LoadConfig('db'),
   logging: false,
   define: {
     timestamps: false,

@@ -17,9 +17,17 @@ export type DBConfig = {
   database: string;
 };
 
+export type APIConfig = {
+  port: number;
+  version: string;
+  minute_limit: number;
+  hour_limit: number;
+};
+
 export type Configs = {
   hashing: HashingConfig;
   db: DBConfig;
+  api: APIConfig;
 };
 
 export type ConfigName = keyof Configs;

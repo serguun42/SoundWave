@@ -1,62 +1,62 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
-import {
-  FindLikedPlaylists,
-  FindLikedTracks,
-  FindOwnedTracks,
-  GetFullPlaylist,
-  GetTracksByPlaylist,
-  GetUser,
-  LikePlaylist,
-  UnlikePlaylist,
-} from './database/methods.js';
-import LogMessageOrError from './util/log.js';
+import http, { STATUS_CODES } from 'node:http';
+import mime from 'mime-types';
+import LoadConfig from './util/load-configs.js';
+import { ParseCookie, ParsePath, ParseQuery, SafeDecode, SafeURL } from './util/urls.js';
+import RateLimit from './util/rate-limit.js';
+import RunAPIMethod from './api/index.js';
 
-setTimeout(() => {
-  GetUser('admin')
-    .then((user) => {
-      if (!user) return;
+const { port, version } = LoadConfig('api');
 
-      FindLikedTracks(user.username)
-        .then((likedTracks) => {
-          console.log('likedTracks:', likedTracks);
-        })
-        .catch(LogMessageOrError);
+/**
+ * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
+ * @param {number} code
+ * @param {string | Buffer | Object} data
+ */
+const SendPayload = (res, code, data) => {
+  res.statusCode = code;
 
-      FindLikedPlaylists(user.username)
-        .then((likedPlaylists) => {
-          console.log('likedPlaylists:', likedPlaylists);
+  if (data instanceof Buffer || typeof data === 'string') {
+    const dataToSend = data.toString();
+    res.end(dataToSend);
+  } else {
+    const dataToSend = JSON.stringify(data);
+    res.setHeader('Content-Type', mime.contentType('json'));
+    res.end(dataToSend);
+  }
+};
 
-          const playlistUUID = likedPlaylists[0]?.uuid;
-          if (!playlistUUID) return;
+/**
+ * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
+ * @param {number} code
+ * @returns {void}
+ */
+const SendCode = (res, code) => {
+  res.statusCode = code || 500;
+  res.end(`${code || 500} ${STATUS_CODES[code || 500]}`);
+};
 
-          GetFullPlaylist(playlistUUID)
-            .then((fullPlaylist) => console.log('fullPlaylist:', fullPlaylist))
-            .catch(LogMessageOrError);
+http
+  .createServer((req, res) => {
+    if (RateLimit(req)) return SendCode(429);
 
-          GetTracksByPlaylist(playlistUUID)
-            .then((tracksInPlaylist) => console.log('tracksInPlaylist:', tracksInPlaylist))
-            .catch(LogMessageOrError);
+    const pathname = SafeDecode(SafeURL(req.url).pathname);
+    const path = ParsePath(pathname);
+    const queries = ParseQuery(SafeURL(req.url).search);
+    const cookies = ParseCookie(req.headers);
 
-          UnlikePlaylist(user.username, playlistUUID)
-            .then(() => {
-              console.log(`Playlist unliked`);
-              return LikePlaylist(user.username, playlistUUID);
-            })
-            .then(() => console.log(`Playlist liked again`))
-            .catch(LogMessageOrError);
-        })
-        .catch(LogMessageOrError);
-    })
-    .catch(LogMessageOrError);
+    res.setHeader('Content-Type', mime.contentType('txt'));
 
-  // /** @type {import('./types/db-models').UserDB} */
-  // const newUser = {
-  //   username: 'second_user',
-  //   password_salt: CreateSalt(),
-  // };
-  // HashPassword('password', newUser.password_salt)
-  //   .then((passwordHash) => InsertUser({ ...newUser, password_hash: passwordHash }))
-  //   .then((createdUser) => console.log('Created user:', UnwrapModel(createdUser)))
-  //   .catch(LogMessageOrError);
-}, 1000);
+    if (path[0] !== 'api') return SendCode(res, 404);
+    if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
+
+    return RunAPIMethod({
+      req,
+      res,
+      path,
+      queries,
+      cookies,
+      sendCode: (...args) => SendCode(res, ...args),
+      sendPayload: (...args) => SendPayload(res, ...args),
+    });
+  })
+  .listen(port);
