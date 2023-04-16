@@ -1,4 +1,6 @@
+import LogMessageOrError from '../util/log.js';
 import UnwrapModel from '../util/unwrap-model.js';
+import sequelize from './authenticate.js';
 import MODELS from './models.js';
 
 /**
@@ -48,15 +50,15 @@ export const FindOwnedTracks = (owner, offset = 0, limit = 100) =>
 export const GetPlaylistInfo = (uuid) => MODELS.PlaylistDB.findOne({ where: { uuid } }).then(UnwrapModel);
 
 /** @param {import('../types/playlist').PlaylistInfo} playlistInfo */
-export const AddPlaylist = (playlistInfo) => MODELS.PlaylistDB.create(playlistInfo);
+export const AddPlaylistInfo = (playlistInfo) => MODELS.PlaylistDB.create(playlistInfo);
 
 /**
  * @param {string} playlistUUID
- * @param {import('../types/playlist').PlaylistInfo} playlistData
+ * @param {import('../types/playlist').PlaylistInfo} playlistInfo
  * @returns {Promise}
  */
-export const UpdatePlaylist = (playlistUUID, playlistData) =>
-  MODELS.PlaylistDB.update(playlistData, { where: { uuid: playlistUUID } });
+export const UpdatePlaylistInfo = (playlistUUID, playlistInfo) =>
+  MODELS.PlaylistDB.update(playlistInfo, { where: { uuid: playlistUUID } });
 
 /**
  * @param {string} playlistUUID
@@ -111,19 +113,30 @@ export const GetTracksByPlaylist = (playlistUUID) =>
     }))
   );
 
-// TODO: Transaction with deleting then adding!
 /**
  * @param {import('../types/playlist').PlaylistSavingPositions} savingPositions
  * @returns {Promise}
  */
 export const SaveTracksByPlaylist = (savingPositions) =>
-  MODELS.PlaylistTrackDB.bulkCreate(
-    savingPositions.positions.map(({ trackUUID, position }) => ({
-      playlist_uuid: savingPositions.playlistUUID,
-      track_uuid: trackUUID,
-      position,
-    }))
-  );
+  sequelize.transaction().then((transaction) => {
+    try {
+      return MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: savingPositions.playlistUUID } }, { transaction })
+        .then(() =>
+          MODELS.PlaylistTrackDB.bulkCreate(
+            savingPositions.positions.map(({ trackUUID, position }) => ({
+              playlist_uuid: savingPositions.playlistUUID,
+              track_uuid: trackUUID,
+              position,
+            })),
+            { transaction }
+          )
+        )
+        .then(() => transaction.commit());
+    } catch (e) {
+      LogMessageOrError('SaveTracksByPlaylist transaction rollback:', e);
+      return transaction.rollback().then(() => Promise.reject(e));
+    }
+  });
 
 /**
  * @param {string} owner
