@@ -8,6 +8,14 @@ export type UserDB = {
   is_admin: boolean;
 };
 
+export type SessionDB = {
+  /** Limited by 64 chars */
+  session_token: string;
+  /** Username */
+  owner: string;
+  until: Date;
+};
+
 export type TrackDB = {
   uuid: string;
   /** Duration of the uploaded file (in seconds) */
@@ -48,6 +56,7 @@ export type PlaylistLikeDB = {
 
 export type ModelNamesToEntities = {
   UserDB: UserDB;
+  SessionDB: SessionDB;
   TrackDB: TrackDB;
   PlaylistDB: PlaylistDB;
   PlaylistTrackDB: PlaylistTrackDB;
@@ -57,6 +66,7 @@ export type ModelNamesToEntities = {
 
 export type ModelNamesToTableNames = {
   UserDB: 'users';
+  SessionDB: 'sessions';
   TrackDB: 'tracks';
   PlaylistDB: 'playlists';
   PlaylistTrackDB: 'playlists_tracks';

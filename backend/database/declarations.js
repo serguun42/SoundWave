@@ -26,6 +26,11 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'hasMany',
+        with: 'SessionDB',
+        foreignKey: 'owner',
+      },
+      {
+        type: 'hasMany',
         with: 'TrackDB',
         foreignKey: 'owner',
       },
@@ -43,6 +48,36 @@ const DECLARATIONS = {
         type: 'hasMany',
         with: 'PlaylistLikeDB',
         foreignKey: 'liker',
+      },
+    ],
+  },
+
+  SessionDB: {
+    tableName: 'sessions',
+    attributes: {
+      session_token: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        primaryKey: true,
+      },
+      owner: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        references: {
+          model: 'users',
+          key: 'username',
+        },
+      },
+      until: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+    },
+    associations: [
+      {
+        type: 'belongsTo',
+        with: 'UserDB',
+        foreignKey: 'owner',
       },
     ],
   },

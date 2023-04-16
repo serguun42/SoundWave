@@ -6,14 +6,18 @@ export type SendCode = (code: number) => void;
 /** Sends any payload with HTTP Code */
 export type SendPayload = (code: number, data: string | Buffer | any) => void;
 
+export type APIError = Error | import('../util/errors.js').JSONParseError | import('../util/errors.js').ResponseError;
+
 export type APIMethodParams = {
   req: IncomingMessage;
   res: ServerResponse<IncomingMessage>;
-  path: string[],
+  path: string[];
   queries: { [queryName: string]: string | true };
   cookies: { [cookieName: string]: string };
   sendCode: SendCode;
   sendPayload: SendPayload;
+  wrapError: (e: APIError) => void;
+  sendError: (code: number) => Promise<APIError>;
 };
 
 export type APIMethod = (params: APIMethodParams) => void;

@@ -1,6 +1,7 @@
 {
-  "iterations": 1000,
-  "key_length": 64,
+  "iterations": 9001,
   "digest": "sha256",
-  "salt_length": 16
+  "salt_length_bytes": 16,
+  "password_key_length_bytes": 64,
+  "session_token_length_bytes": 32
 }

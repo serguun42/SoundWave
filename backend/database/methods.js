@@ -13,6 +13,29 @@ export const GetUser = (username) => MODELS.UserDB.findOne({ where: { username }
 export const AddUser = (user) => MODELS.UserDB.create(user);
 
 /**
+ * @param {string} username
+ * @param {import('../types/db-models').UserDB} userData
+ * @returns {Promise}
+ */
+export const UpdateUser = (username, userData) => MODELS.UserDB.update(userData, { where: { username } });
+
+/**
+ * @param {string} sessionToken
+ * @returns {Promise<import('../types/db-models').SessionDB>}
+ */
+export const GetSession = (sessionToken) =>
+  MODELS.SessionDB.findOne({ where: { session_token: sessionToken } }).then(UnwrapModel);
+
+/** @param {import('../types/db-models').SessionDB} session */
+export const AddSession = (session) => MODELS.SessionDB.create(session);
+
+/**
+ * @param {string} sessionToken
+ * @returns {Promise}
+ */
+export const DeleteSession = (sessionToken) => MODELS.SessionDB.destroy({ where: { session_token: sessionToken } });
+
+/**
  * @param {string} uuid
  * @returns {Promise<import('../types/track').Track>}
  */

@@ -3,7 +3,9 @@ import mime from 'mime-types';
 import LoadConfig from './util/load-configs.js';
 import { ParseCookie, ParsePath, ParseQuery, SafeDecode, SafeURL } from './util/urls.js';
 import RateLimit from './util/rate-limit.js';
+import { ResponseError, JSONParseError } from './util/errors.js';
 import RunAPIMethod from './api/index.js';
+import LogMessageOrError from './util/log.js';
 
 const { port, version } = LoadConfig('api');
 
@@ -35,6 +37,21 @@ const SendCode = (res, code) => {
   res.end(`${code || 500} ${STATUS_CODES[code || 500]}`);
 };
 
+/**
+ * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
+ * @param {import('./types/api').APIError} e
+ */
+const CatchResponse = (res, e) => {
+  if (e instanceof JSONParseError) e = new ResponseError(406);
+
+  if (e instanceof ResponseError) {
+    SendCode(res, e.code || 500);
+  } else {
+    LogMessageOrError(e);
+    SendCode(res, 500);
+  }
+};
+
 http
   .createServer((req, res) => {
     if (RateLimit(req)) return SendCode(429);
@@ -57,6 +74,8 @@ http
       cookies,
       sendCode: (...args) => SendCode(res, ...args),
       sendPayload: (...args) => SendPayload(res, ...args),
+      wrapError: (...args) => CatchResponse(res, ...args),
+      sendError: (code) => Promise.reject(new ResponseError(code)),
     });
   })
   .listen(port);

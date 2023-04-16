@@ -1,12 +1,14 @@
 export type HashingConfig = {
   /** Iterations number for PBKDF2 */
   iterations: number;
-  /** Length for deriving key for PBKDF2 in BYTES */
-  key_length: number;
   /** HMAC digest algorithm */
   digest: string;
-  /** Length for using salt in BYTES */
-  salt_length: number;
+  /** Size of creating salt in BYTES */
+  salt_length_bytes: number;
+  /** Length of key deriving from password with PBKDF2 in BYTES */
+  password_key_length_bytes: number;
+  /** Length of session token in BYTES */
+  session_token_length_bytes: number;
 };
 
 export type DBConfig = {
