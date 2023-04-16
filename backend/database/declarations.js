@@ -78,6 +78,7 @@ const DECLARATIONS = {
         type: 'belongsTo',
         with: 'UserDB',
         foreignKey: 'owner',
+        as: 'session_to_user',
       },
     ],
   },

@@ -75,7 +75,7 @@ http
       sendCode: (...args) => SendCode(res, ...args),
       sendPayload: (...args) => SendPayload(res, ...args),
       wrapError: (...args) => CatchResponse(res, ...args),
-      sendError: (code) => Promise.reject(new ResponseError(code)),
+      endWithError: (code) => Promise.reject(new ResponseError(code)),
     });
   })
   .listen(port);

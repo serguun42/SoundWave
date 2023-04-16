@@ -21,10 +21,28 @@ export const UpdateUser = (username, userData) => MODELS.UserDB.update(userData,
 
 /**
  * @param {string} sessionToken
- * @returns {Promise<import('../types/db-models').SessionDB>}
+ * @returns {Promise<import('../types/db-models').UserDB>}
  */
 export const GetSession = (sessionToken) =>
   MODELS.SessionDB.findOne({ where: { session_token: sessionToken } }).then(UnwrapModel);
+/**
+ * @param {string} sessionToken
+ * @returns {Promise<import('../types/db-models').UserDB>}
+ */
+export const GetUserBySession = (sessionToken) =>
+  MODELS.SessionDB.findOne({
+    where: { session_token: sessionToken },
+    include: [
+      {
+        model: MODELS.UserDB,
+        as: 'session_to_user',
+      },
+    ],
+  }).then((sessionWithUser) => {
+    if (!sessionWithUser) return Promise.resolve(null);
+
+    return UnwrapModel(sessionWithUser.session_to_user);
+  });
 
 /** @param {import('../types/db-models').SessionDB} session */
 export const AddSession = (session) => MODELS.SessionDB.create(session);

@@ -17,7 +17,7 @@ export type APIMethodParams = {
   sendCode: SendCode;
   sendPayload: SendPayload;
   wrapError: (e: APIError) => void;
-  sendError: (code: number) => Promise<APIError>;
+  endWithError: (code: number) => Promise<APIError>;
 };
 
 export type APIMethod = (params: APIMethodParams) => void;
