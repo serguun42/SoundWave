@@ -2,30 +2,48 @@
 /* eslint-disable no-console */
 import {
   FindLikedPlaylists,
+  FindLikedTracks,
+  FindOwnedTracks,
   GetFullPlaylist,
-  GetPlaylistInfo,
-  GetTrack,
   GetTracksByPlaylist,
   GetUser,
+  LikePlaylist,
+  UnlikePlaylist,
 } from './database/methods.js';
 import LogMessageOrError from './util/log.js';
-import UnwrapModel from './util/unwrap-model.js';
 
 setTimeout(() => {
   GetUser('admin')
     .then((user) => {
       if (!user) return;
 
-      FindLikedPlaylists(UnwrapModel(user).username)
+      FindLikedTracks(user.username)
+        .then((likedTracks) => {
+          console.log('likedTracks:', likedTracks);
+        })
+        .catch(LogMessageOrError);
+
+      FindLikedPlaylists(user.username)
         .then((likedPlaylists) => {
-          const playlistUUID = UnwrapModel(likedPlaylists)[0]?.playlist_uuid;
+          console.log('likedPlaylists:', likedPlaylists);
+
+          const playlistUUID = likedPlaylists[0]?.uuid;
+          if (!playlistUUID) return;
 
           GetFullPlaylist(playlistUUID)
-            .then((fullPlaylist) => console.log('fullPlaylist:', JSON.stringify(fullPlaylist, false, 2)))
+            .then((fullPlaylist) => console.log('fullPlaylist:', fullPlaylist))
             .catch(LogMessageOrError);
 
           GetTracksByPlaylist(playlistUUID)
-            .then((tracksInPlaylist) => console.log('tracksInPlaylist:', JSON.stringify(tracksInPlaylist, false, 2)))
+            .then((tracksInPlaylist) => console.log('tracksInPlaylist:', tracksInPlaylist))
+            .catch(LogMessageOrError);
+
+          UnlikePlaylist(user.username, playlistUUID)
+            .then(() => {
+              console.log(`Playlist unliked`);
+              return LikePlaylist(user.username, playlistUUID);
+            })
+            .then(() => console.log(`Playlist liked again`))
             .catch(LogMessageOrError);
         })
         .catch(LogMessageOrError);

@@ -1,9 +1,9 @@
 export type UserDB = {
-  /** Limited with 64 chars */
+  /** Limited by 64 chars */
   username: string;
-  /** Limited with hashing config */
+  /** Limited by hashing config */
   password_hash: string;
-  /** Limited with hashing config */
+  /** Limited by hashing config */
   password_salt: string;
   is_admin: boolean;
 };
@@ -38,12 +38,12 @@ export type PlaylistTrackDB = {
 
 export type TrackLikeDB = {
   track_uuid: string;
-  owner: string;
+  liker: string;
 };
 
 export type PlaylistLikeDB = {
   playlist_uuid: string;
-  owner: string;
+  liker: string;
 };
 
 export type ModelNamesToEntities = {
@@ -72,7 +72,7 @@ type TableNames = ModelNamesToTableNames[keyof ModelNamesToTableNames];
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 type Association = {
   type: 'hasOne' | 'hasMany' | 'belongsTo' | 'belongsToMany';
-  with: ModelNames | ModelNames[];
+  with: ModelNames;
   foreignKey?: KeysOfUnion<ModelNamesToEntities[ModelNames]>;
   through?: ModelNames;
   as?: string;

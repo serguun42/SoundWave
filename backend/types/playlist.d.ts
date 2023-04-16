@@ -1,6 +1,14 @@
 import { PlaylistDB } from './db-models';
-import { Track } from './track';
+import { TrackInPlaylist } from './track';
 
 export type PlaylistInfo = PlaylistDB;
 
-export type PlaylistFull = PlaylistInfo & { tracks_for_full_playlist: TrackInPlaylist[] };
+export type PlaylistFull = PlaylistInfo & { tracks_in_playlist: TrackInPlaylist[] };
+
+export type PlaylistSavingPositions = {
+  playlistUUID: string;
+  positions: {
+    trackUUID: string;
+    position: number;
+  }[];
+};

@@ -36,16 +36,14 @@ modelNames.forEach((modelName) => {
   const model = MODELS[modelName];
 
   associations.forEach((association) => {
-    if (typeof association.with === 'string') association.with = [association.with];
+    if (!association?.with) return;
+    if (typeof association.with !== 'string') return;
 
-    if (Array.isArray(association.with))
-      association.with.forEach((withTable) => {
-        model[association.type](MODELS[withTable], {
-          through: association.through ? MODELS[association.through] : undefined,
-          foreignKey: association.foreignKey,
-          as: association.as || `${association.type}_${withTable}`,
-        });
-      });
+    model[association.type](MODELS[association.with], {
+      through: association.through ? MODELS[association.through] : undefined,
+      foreignKey: association.foreignKey,
+      as: association.as || `${association.type}_${association.with}`,
+    });
   });
 });
 
