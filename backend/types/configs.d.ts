@@ -24,6 +24,14 @@ export type APIConfig = {
   version: string;
   minute_limit: number;
   hour_limit: number;
+  domain: string;
+  /** Fill this to enable TLS for local API service */
+  secure?: {
+    /** Location of TLS cert file */
+    cert: string;
+    /** Location of TLS key file */
+    key: string;
+  };
 };
 
 export type Configs = {

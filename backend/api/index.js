@@ -1,11 +1,12 @@
-import { CheckSession, SignIn, SignUp } from './account.js';
+import { Check, Logout, SignIn, SignUp } from './account.js';
 
 /** @type {import('../types/api').APIMethodsStorage} */
 const API_METHODS_STORAGE = {
   account: {
-    check: CheckSession,
+    check: Check,
     signin: SignIn,
     signup: SignUp,
+    logout: Logout,
   },
 };
 

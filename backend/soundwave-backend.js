@@ -1,4 +1,6 @@
 import http, { STATUS_CODES } from 'node:http';
+import https from 'node:https';
+import { readFileSync } from 'node:fs';
 import mime from 'mime-types';
 import LoadConfig from './util/load-configs.js';
 import { ParseCookie, ParsePath, ParseQuery, SafeDecode, SafeURL } from './util/urls.js';
@@ -7,7 +9,7 @@ import { ResponseError, JSONParseError } from './util/errors.js';
 import RunAPIMethod from './api/index.js';
 import LogMessageOrError from './util/log.js';
 
-const { port, version } = LoadConfig('api');
+const { port, version, secure } = LoadConfig('api');
 
 /**
  * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
@@ -52,30 +54,41 @@ const CatchResponse = (res, e) => {
   }
 };
 
-http
-  .createServer((req, res) => {
-    if (RateLimit(req)) return SendCode(429);
+/** @type {import('http').RequestListener} */
+const ServerHandle = (req, res) => {
+  if (RateLimit(req)) return SendCode(429);
 
-    const pathname = SafeDecode(SafeURL(req.url).pathname);
-    const path = ParsePath(pathname);
-    const queries = ParseQuery(SafeURL(req.url).search);
-    const cookies = ParseCookie(req.headers);
+  const pathname = SafeDecode(SafeURL(req.url).pathname);
+  const path = ParsePath(pathname);
+  const queries = ParseQuery(SafeURL(req.url).search);
+  const cookies = ParseCookie(req.headers);
 
-    res.setHeader('Content-Type', mime.contentType('txt'));
+  res.setHeader('Content-Type', mime.contentType('txt'));
 
-    if (path[0] !== 'api') return SendCode(res, 404);
-    if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
+  if (path[0] !== 'api') return SendCode(res, 404);
+  if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
 
-    return RunAPIMethod({
-      req,
-      res,
-      path,
-      queries,
-      cookies,
-      sendCode: (...args) => SendCode(res, ...args),
-      sendPayload: (...args) => SendPayload(res, ...args),
-      wrapError: (...args) => CatchResponse(res, ...args),
-      endWithError: (code) => Promise.reject(new ResponseError(code)),
-    });
-  })
-  .listen(port);
+  return RunAPIMethod({
+    req,
+    res,
+    path,
+    queries,
+    cookies,
+    sendCode: (...args) => SendCode(res, ...args),
+    sendPayload: (...args) => SendPayload(res, ...args),
+    wrapError: (...args) => CatchResponse(res, ...args),
+    endWithError: (code) => Promise.reject(new ResponseError(code)),
+  });
+};
+
+if (secure?.cert && secure?.key)
+  https
+    .createServer(
+      {
+        cert: readFileSync(secure.cert),
+        key: readFileSync(secure.key),
+      },
+      ServerHandle
+    )
+    .listen(port);
+else http.createServer(ServerHandle).listen(port);

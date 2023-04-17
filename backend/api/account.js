@@ -1,29 +1,17 @@
-import { AddSession, AddUser, GetUser, GetUserBySession } from '../database/methods.js';
+import { AddSession, AddUser, DeleteSession, GetUser } from '../database/methods.js';
+import UserFromCookieToken from '../util/user-from-cookie-token.js';
 import { CreateSalt, CreateSessionToken, HashPassword } from '../util/hashes.js';
 import ReadPayload from '../util/read-payload.js';
-
-/**
- * @param {import('../types/api').APIMethodParams} params
- * @returns {Promise<import('../types/db-models').UserDB | null>}
- */
-const CheckUser = ({ cookies }) => {
-  const sessionToken = cookies.session_token;
-  if (!sessionToken) return Promise.reject();
-
-  return GetUserBySession(sessionToken).then((user) => {
-    if (!user) return Promise.reject();
-    return Promise.resolve(user);
-  });
-};
+import LoadConfig from '../util/load-configs.js';
 
 /** @type {import('../types/api').APIMethod} */
-export const CheckSession = ({ req, cookies, sendCode, sendPayload }) => {
+export const Check = ({ req, cookies, sendCode, sendPayload }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
   }
 
-  CheckUser({ cookies })
+  UserFromCookieToken({ cookies })
     .then((user) => {
       if (!user) return Promise.reject();
       sendPayload(200, { ok: true, username: user.username, is_admin: user.is_admin });
@@ -33,7 +21,7 @@ export const CheckSession = ({ req, cookies, sendCode, sendPayload }) => {
 };
 
 /** @type {import('../types/api').APIMethod} */
-export const SignIn = ({ req, sendCode, sendPayload, wrapError, endWithError }) => {
+export const SignIn = ({ req, res, sendCode, sendPayload, wrapError, endWithError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
@@ -58,6 +46,12 @@ export const SignIn = ({ req, sendCode, sendPayload, wrapError, endWithError }) 
                 owner: credentials.username,
                 until: expirationDate,
               }).then(() => {
+                res.setHeader(
+                  'Set-Cookie',
+                  `session_token=${sessionToken}; Expires=${expirationDate.toUTCString()}; Path=/; Domain=${
+                    LoadConfig('api').domain
+                  }; Secure`
+                );
                 sendPayload(200, { session_token: sessionToken });
               });
             });
@@ -69,7 +63,7 @@ export const SignIn = ({ req, sendCode, sendPayload, wrapError, endWithError }) 
 };
 
 /** @type {import('../types/api').APIMethod} */
-export const SignUp = ({ req, sendCode, sendPayload, wrapError, endWithError }) => {
+export const SignUp = ({ req, res, sendCode, sendPayload, wrapError, endWithError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
@@ -107,6 +101,12 @@ export const SignUp = ({ req, sendCode, sendPayload, wrapError, endWithError }) 
                   owner: credentials.username,
                   until: expirationDate,
                 }).then(() => {
+                  res.setHeader(
+                    'Set-Cookie',
+                    `session_token=${sessionToken}; Expires=${expirationDate.toUTCString()}; Path=/; Domain=${
+                      LoadConfig('api').domain
+                    }; Secure`
+                  );
                   sendPayload(200, { session_token: sessionToken });
                 });
               })
@@ -115,4 +115,26 @@ export const SignUp = ({ req, sendCode, sendPayload, wrapError, endWithError }) 
       }
     )
     .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const Logout = ({ req, res, cookies, sendCode, sendPayload }) => {
+  if (req.method !== 'POST') {
+    sendCode(405);
+    return;
+  }
+
+  UserFromCookieToken({ cookies })
+    .then((user) => {
+      if (!user) return Promise.reject();
+
+      return DeleteSession(cookies.session_token).then(() => {
+        res.setHeader(
+          'Set-Cookie',
+          `session_token=null; Expires=${new Date(0).toUTCString()}; Path=/; Domain=${LoadConfig('api').domain}; Secure`
+        );
+        sendPayload(200, { ok: true });
+      });
+    })
+    .catch(() => sendPayload(403, { ok: false }));
 };
