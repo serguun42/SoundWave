@@ -9,12 +9,15 @@ import MODELS from './models.js';
  */
 export const GetUser = (username) => MODELS.UserDB.findOne({ where: { username } }).then(UnwrapModel);
 
-/** @param {import('../types/db-models').UserDB} user */
-export const AddUser = (user) => MODELS.UserDB.create(user);
+/**
+ * @param {import('../types/db-models').UserDB} user
+ * @returns {Promise<import('../types/db-models').UserDB>}
+ */
+export const AddUser = (user) => MODELS.UserDB.create(user).then(UnwrapModel);
 
 /**
  * @param {string} username
- * @param {import('../types/db-models').UserDB} userData
+ * @param {Partial<import('../types/db-models').UserDB>} userData
  * @returns {Promise}
  */
 export const UpdateUser = (username, userData) => MODELS.UserDB.update(userData, { where: { username } });
@@ -44,8 +47,11 @@ export const GetUserBySession = (sessionToken) =>
     return UnwrapModel(sessionWithUser.session_to_user);
   });
 
-/** @param {import('../types/db-models').SessionDB} session */
-export const AddSession = (session) => MODELS.SessionDB.create(session);
+/**
+ * @param {import('../types/db-models').SessionDB} session
+ * @returns {Promise<import('../types/db-models').SessionDB>}
+ */
+export const AddSession = (session) => MODELS.SessionDB.create(session).then(UnwrapModel);
 
 /**
  * @param {string} sessionToken
@@ -59,12 +65,15 @@ export const DeleteSession = (sessionToken) => MODELS.SessionDB.destroy({ where:
  */
 export const GetTrack = (uuid) => MODELS.TrackDB.findOne({ where: { uuid } }).then(UnwrapModel);
 
-/** @param {import('../types/track').Track} track */
-export const AddTrack = (track) => MODELS.TrackDB.create(track);
+/**
+ * @param {import('../types/track').Track} track
+ * @returns {Promise<import('../types/track').Track>}
+ */
+export const AddTrack = (track) => MODELS.TrackDB.create(track).then(UnwrapModel);
 
 /**
  * @param {string} trackUUID
- * @param {import('../types/track').Track} trackData
+ * @param {Partial<import('../types/track').Track>} trackData
  * @returns {Promise}
  */
 export const UpdateTrack = (trackUUID, trackData) => MODELS.TrackDB.update(trackData, { where: { uuid: trackUUID } });
@@ -90,12 +99,15 @@ export const FindOwnedTracks = (owner, offset = 0, limit = 100) =>
  */
 export const GetPlaylistInfo = (uuid) => MODELS.PlaylistDB.findOne({ where: { uuid } }).then(UnwrapModel);
 
-/** @param {import('../types/playlist').PlaylistInfo} playlistInfo */
-export const AddPlaylistInfo = (playlistInfo) => MODELS.PlaylistDB.create(playlistInfo);
+/**
+ * @param {import('../types/playlist').PlaylistInfo} playlistInfo
+ * @returns {Promise<import('../types/playlist').PlaylistInfo>}
+ */
+export const AddPlaylistInfo = (playlistInfo) => MODELS.PlaylistDB.create(playlistInfo).then(UnwrapModel);
 
 /**
  * @param {string} playlistUUID
- * @param {import('../types/playlist').PlaylistInfo} playlistInfo
+ * @param {Partial<import('../types/playlist').PlaylistInfo>} playlistInfo
  * @returns {Promise}
  */
 export const UpdatePlaylistInfo = (playlistUUID, playlistInfo) =>
@@ -161,11 +173,11 @@ export const GetTracksByPlaylist = (playlistUUID) =>
 export const SaveTracksByPlaylist = (savingPositions) =>
   sequelize.transaction().then((transaction) => {
     try {
-      return MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: savingPositions.playlistUUID } }, { transaction })
+      return MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: savingPositions.uuid } }, { transaction })
         .then(() =>
           MODELS.PlaylistTrackDB.bulkCreate(
-            savingPositions.positions.map(({ trackUUID, position }) => ({
-              playlist_uuid: savingPositions.playlistUUID,
+            savingPositions.positions.map((trackUUID, position) => ({
+              playlist_uuid: savingPositions.uuid,
               track_uuid: trackUUID,
               position,
             })),
@@ -178,6 +190,12 @@ export const SaveTracksByPlaylist = (savingPositions) =>
       return transaction.rollback().then(() => Promise.reject(e));
     }
   });
+
+/**
+ * @param {string} playlistUUID
+ */
+export const RemoveAllTracksFromPlaylist = (playlistUUID) =>
+  MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: playlistUUID } });
 
 /**
  * @param {string} owner
@@ -211,13 +229,13 @@ export const FindLikedTracks = (liker, offset = 0, limit = 100) =>
 /**
  * @param {string} liker
  * @param {string} trackUUID
- * @returns {Promise}
+ * @returns {Promise<import('../types/db-models').TrackLikeDB>}
  */
 export const LikeTrack = (liker, trackUUID) =>
   MODELS.TrackLikeDB.create({
     liker,
     track_uuid: trackUUID,
-  });
+  }).then(UnwrapModel);
 
 /**
  * @param {string} liker
@@ -256,13 +274,13 @@ export const FindLikedPlaylists = (liker, offset = 0, limit = 100) =>
 /**
  * @param {string} liker
  * @param {string} playlistUUID
- * @returns {Promise}
+ * @returns {Promise<import('../types/db-models').PlaylistLikeDB>}
  */
 export const LikePlaylist = (liker, playlistUUID) =>
   MODELS.PlaylistLikeDB.create({
     liker,
     playlist_uuid: playlistUUID,
-  });
+  }).then(UnwrapModel);
 
 /**
  * @param {string} liker

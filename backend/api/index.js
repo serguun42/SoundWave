@@ -1,12 +1,28 @@
-import { Check, Logout, SignIn, SignUp } from './account.js';
+import { CheckSession, Logout, SignIn, SignUp } from './account.js';
+import {
+  CreatePlaylist,
+  DeletePlaylist,
+  FullPlaylist,
+  PlaylistInfo,
+  UpdatePlaylist,
+  UpdateTracksInPlaylist,
+} from './playlists.js';
 
 /** @type {import('../types/api').APIMethodsStorage} */
 const API_METHODS_STORAGE = {
   account: {
-    check: Check,
+    check: CheckSession,
     signin: SignIn,
     signup: SignUp,
     logout: Logout,
+  },
+  playlist: {
+    info: PlaylistInfo,
+    full: FullPlaylist,
+    updateInfo: UpdatePlaylist,
+    updateTracks: UpdateTracksInPlaylist,
+    create: CreatePlaylist,
+    delete: DeletePlaylist,
   },
 };
 

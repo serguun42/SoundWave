@@ -6,9 +6,8 @@ export type PlaylistInfo = PlaylistDB;
 export type PlaylistFull = PlaylistInfo & { tracks_in_playlist: TrackInPlaylist[] };
 
 export type PlaylistSavingPositions = {
-  playlistUUID: string;
-  positions: {
-    trackUUID: string;
-    position: number;
-  }[];
+  /** Playlist UUID */
+  uuid: string;
+  /** UUID of tracks in order */
+  positions: string[];
 };

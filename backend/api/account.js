@@ -5,13 +5,13 @@ import ReadPayload from '../util/read-payload.js';
 import LoadConfig from '../util/load-configs.js';
 
 /** @type {import('../types/api').APIMethod} */
-export const Check = ({ req, cookies, sendCode, sendPayload }) => {
+export const CheckSession = ({ req, cookies, sendCode, sendPayload }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
   }
 
-  UserFromCookieToken({ cookies })
+  UserFromCookieToken(cookies)
     .then((user) => {
       if (!user) return Promise.reject();
       sendPayload(200, { ok: true, username: user.username, is_admin: user.is_admin });
@@ -124,7 +124,7 @@ export const Logout = ({ req, res, cookies, sendCode, sendPayload }) => {
     return;
   }
 
-  UserFromCookieToken({ cookies })
+  UserFromCookieToken(cookies)
     .then((user) => {
       if (!user) return Promise.reject();
 
