@@ -13,10 +13,11 @@ import {
   UpdateTrack,
 } from '../database/methods.js';
 import LogMessageOrError from '../util/log.js';
-import PullDurationFromFile from '../util/pull-duration-from-file.js';
+import ProbeAudioFile from '../storage/probe-audio-file.js';
 import ReadPayload from '../util/read-payload.js';
-import SaveUpload from '../util/save-upload.js';
+import SaveUpload from '../storage/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
+import SendFile from '../storage/send-file.js';
 
 /** @type {import('../types/api').APIMethod} */
 export const OwnedTracks = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
@@ -75,6 +76,38 @@ export const TrackInfo = ({ req, queries, sendCode, sendPayload, wrapError }) =>
       else sendPayload(200, track);
     })
     .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const TrackCover = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
+  if (req.method !== 'GET') {
+    sendCode(405);
+    return;
+  }
+
+  const { uuid } = queries;
+  if (!uuid || typeof uuid !== 'string') {
+    sendPayload(406, 'No uuid query');
+    return;
+  }
+
+  SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'cover', uuid).catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const TrackAudio = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
+  if (req.method !== 'GET') {
+    sendCode(405);
+    return;
+  }
+
+  const { uuid } = queries;
+  if (!uuid || typeof uuid !== 'string') {
+    sendPayload(406, 'No uuid query');
+    return;
+  }
+
+  SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'audio', uuid).catch(wrapError);
 };
 
 /** @type {import('../types/api').APIMethod} */
@@ -156,8 +189,8 @@ export const UploadAudio = ({ req, cookies, queries, sendCode, sendPayload, endW
         return SaveUpload(req, 'audio', uuid).then(({ received, filename }) => {
           sendPayload(200, { received });
 
-          PullDurationFromFile(filename)
-            .then((duration) => UpdateTrack(uuid, { duration }))
+          ProbeAudioFile(filename)
+            .then(({ duration, mimeType }) => UpdateTrack(uuid, { duration, mime_type: mimeType }))
             .catch(LogMessageOrError);
         });
       });

@@ -14,8 +14,9 @@ import {
   IsPlaylistLiked,
 } from '../database/methods.js';
 import ReadPayload from '../util/read-payload.js';
-import SaveUpload from '../util/save-upload.js';
+import SaveUpload from '../storage/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
+import SendFile from '../storage/send-file.js';
 
 /** @type {import('../types/api').APIMethod} */
 export const OwnedPlaylists = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
@@ -74,6 +75,22 @@ export const PlaylistInfo = ({ req, queries, sendCode, sendPayload, wrapError })
       else sendPayload(200, playlist);
     })
     .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const PlaylistCover = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
+  if (req.method !== 'GET') {
+    sendCode(405);
+    return;
+  }
+
+  const { uuid } = queries;
+  if (!uuid || typeof uuid !== 'string') {
+    sendPayload(406, 'No uuid query');
+    return;
+  }
+
+  SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'cover', uuid).catch(wrapError);
 };
 
 /** @type {import('../types/api').APIMethod} */

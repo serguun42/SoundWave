@@ -1,7 +1,7 @@
 import { createWriteStream, WriteStream } from 'node:fs';
 import { join } from 'node:path';
-import LoadConfig from './load-configs.js';
-import { PayloadTooLargeError } from './errors.js';
+import LoadConfig from '../util/load-configs.js';
+import { PayloadTooLargeError } from '../util/errors.js';
 
 const { data_storage_root: DATA_STORAGE_ROOT } = LoadConfig('api');
 
