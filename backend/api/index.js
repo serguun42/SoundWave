@@ -3,10 +3,24 @@ import {
   CreatePlaylist,
   DeletePlaylist,
   FullPlaylist,
+  LikedPlaylists,
+  MarkPlaylistAsLiked,
+  MarkPlaylistAsUnliked,
+  OwnedPlaylists,
   PlaylistInfo,
   UpdatePlaylist,
   UpdateTracksInPlaylist,
 } from './playlists.js';
+import {
+  CreateTrack,
+  DeleteTrack,
+  LikedTracks,
+  MarkTrackAsLiked,
+  MarkTrackAsUnliked,
+  OwnedTracks,
+  TrackInfo,
+  TracksByPlaylist,
+} from './tracks.js';
 
 /** @type {import('../types/api').APIMethodsStorage} */
 const API_METHODS_STORAGE = {
@@ -16,13 +30,28 @@ const API_METHODS_STORAGE = {
     signup: SignUp,
     logout: Logout,
   },
-  playlist: {
+  playlists: {
+    owned: OwnedPlaylists,
+    liked: LikedPlaylists,
     info: PlaylistInfo,
     full: FullPlaylist,
     updateInfo: UpdatePlaylist,
     updateTracks: UpdateTracksInPlaylist,
     create: CreatePlaylist,
     delete: DeletePlaylist,
+    like: MarkPlaylistAsLiked,
+    unlike: MarkPlaylistAsUnliked,
+  },
+  tracks: {
+    owned: OwnedTracks,
+    liked: LikedTracks,
+    info: TrackInfo,
+    byPlaylist: TracksByPlaylist,
+    create: CreateTrack,
+    // TODO: upload to storage
+    delete: DeleteTrack,
+    like: MarkTrackAsLiked,
+    unlike: MarkTrackAsUnliked,
   },
 };
 
@@ -44,6 +73,7 @@ const SelectMethod = (path) => {
 
 /** @type {import('../types/api').APIMethod} */
 const RunAPIMethod = (params) => {
+  /** Remove /api/v0/ */
   const method = SelectMethod(params.path.slice(2));
 
   if (typeof method !== 'function') {

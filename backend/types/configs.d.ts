@@ -25,6 +25,8 @@ export type APIConfig = {
   minute_limit: number;
   hour_limit: number;
   domain: string;
+  /** Root location for audio & image files */
+  data_storage_root: string;
   /** Fill this to enable TLS for local API service */
   secure?: {
     /** Location of TLS cert file */

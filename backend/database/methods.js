@@ -171,29 +171,30 @@ export const GetTracksByPlaylist = (playlistUUID) =>
  * @returns {Promise}
  */
 export const SaveTracksByPlaylist = (savingPositions) =>
-  sequelize.transaction().then((transaction) => {
-    try {
-      return MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: savingPositions.uuid } }, { transaction })
-        .then(() =>
-          MODELS.PlaylistTrackDB.bulkCreate(
-            savingPositions.positions.map((trackUUID, position) => ({
-              playlist_uuid: savingPositions.uuid,
-              track_uuid: trackUUID,
-              position,
-            })),
-            { transaction }
-          )
+  sequelize.transaction().then((transaction) =>
+    MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: savingPositions.uuid } }, { transaction })
+      .then(() =>
+        MODELS.PlaylistTrackDB.bulkCreate(
+          savingPositions.positions.map((trackUUID, position) => ({
+            playlist_uuid: savingPositions.uuid,
+            track_uuid: trackUUID,
+            position,
+          })),
+          { transaction }
         )
-        .then(() => transaction.commit());
-    } catch (e) {
-      LogMessageOrError('SaveTracksByPlaylist transaction rollback:', e);
-      return transaction.rollback().then(() => Promise.reject(e));
-    }
-  });
+      )
+      .then(() => transaction.commit())
+      .catch((e) => {
+        LogMessageOrError('SaveTracksByPlaylist transaction rollback:', e);
+        return transaction.rollback().then(() => Promise.reject(e));
+      })
+  );
 
-/**
- * @param {string} playlistUUID
- */
+/** @param {string} trackUUID */
+export const RemoveTrackFromAllPlaylists = (trackUUID) =>
+  MODELS.PlaylistTrackDB.destroy({ where: { track_uuid: trackUUID } });
+
+/** @param {string} playlistUUID */
 export const RemoveAllTracksFromPlaylist = (playlistUUID) =>
   MODELS.PlaylistTrackDB.destroy({ where: { playlist_uuid: playlistUUID } });
 
@@ -201,9 +202,10 @@ export const RemoveAllTracksFromPlaylist = (playlistUUID) =>
  * @param {string} owner
  * @param {number} [offset]
  * @param {number} [limit]
+ * @returns {Promise<import('../types/db-models').PlaylistDB[]>}
  */
 export const FindOwnedPlaylists = (owner, offset = 0, limit = 100) =>
-  MODELS.PlaylistDB.findAll({ where: { owner }, limit, offset });
+  MODELS.PlaylistDB.findAll({ where: { owner }, limit, offset }).then(UnwrapModel);
 
 /**
  * @param {string} liker
@@ -227,15 +229,26 @@ export const FindLikedTracks = (liker, offset = 0, limit = 100) =>
     .then(UnwrapModel);
 
 /**
+ * Checks whether track is liked yet
+ * @param {string} liker
+ * @param {string} trackUUID
+ * @returns {Promise<boolean>}
+ */
+export const IsTrackLiked = (liker, trackUUID) =>
+  MODELS.TrackLikeDB.findOne({
+    where: { liker, track_uuid: trackUUID },
+  }).then((trackLike) => {
+    if (UnwrapModel(trackLike)?.liker === liker) return Promise.resolve(true);
+    return Promise.resolve(false);
+  });
+
+/**
  * @param {string} liker
  * @param {string} trackUUID
  * @returns {Promise<import('../types/db-models').TrackLikeDB>}
  */
 export const LikeTrack = (liker, trackUUID) =>
-  MODELS.TrackLikeDB.create({
-    liker,
-    track_uuid: trackUUID,
-  }).then(UnwrapModel);
+  MODELS.TrackLikeDB.create({ liker, track_uuid: trackUUID }).then(UnwrapModel);
 
 /**
  * @param {string} liker
@@ -243,12 +256,13 @@ export const LikeTrack = (liker, trackUUID) =>
  * @returns {Promise}
  */
 export const UnlikeTrack = (liker, trackUUID) =>
-  MODELS.TrackLikeDB.destroy({
-    where: {
-      liker,
-      track_uuid: trackUUID,
-    },
-  });
+  MODELS.TrackLikeDB.destroy({ where: { liker, track_uuid: trackUUID } });
+
+/**
+ * @param {string} trackUUID
+ * @returns {Promise}
+ */
+export const UnlikeTrackForEveryone = (trackUUID) => MODELS.TrackLikeDB.destroy({ where: { track_uuid: trackUUID } });
 
 /**
  * @param {string} liker
@@ -272,15 +286,26 @@ export const FindLikedPlaylists = (liker, offset = 0, limit = 100) =>
     .then(UnwrapModel);
 
 /**
+ * Checks whether playlist is liked yet
+ * @param {string} liker
+ * @param {string} playlistUUID
+ * @returns {Promise<boolean>}
+ */
+export const IsPlaylistLiked = (liker, playlistUUID) =>
+  MODELS.PlaylistLikeDB.findOne({
+    where: { liker, playlist_uuid: playlistUUID },
+  }).then((playlistLike) => {
+    if (UnwrapModel(playlistLike)?.liker === liker) return Promise.resolve(true);
+    return Promise.resolve(false);
+  });
+
+/**
  * @param {string} liker
  * @param {string} playlistUUID
  * @returns {Promise<import('../types/db-models').PlaylistLikeDB>}
  */
 export const LikePlaylist = (liker, playlistUUID) =>
-  MODELS.PlaylistLikeDB.create({
-    liker,
-    playlist_uuid: playlistUUID,
-  }).then(UnwrapModel);
+  MODELS.PlaylistLikeDB.create({ liker, playlist_uuid: playlistUUID }).then(UnwrapModel);
 
 /**
  * @param {string} liker
@@ -288,9 +313,11 @@ export const LikePlaylist = (liker, playlistUUID) =>
  * @returns {Promise}
  */
 export const UnlikePlaylist = (liker, playlistUUID) =>
-  MODELS.PlaylistLikeDB.destroy({
-    where: {
-      liker,
-      playlist_uuid: playlistUUID,
-    },
-  });
+  MODELS.PlaylistLikeDB.destroy({ where: { liker, playlist_uuid: playlistUUID } });
+
+/**
+ * @param {string} playlistUUID
+ * @returns {Promise}
+ */
+export const UnlikePlaylistForEveryone = (playlistUUID) =>
+  MODELS.PlaylistLikeDB.destroy({ where: { playlist_uuid: playlistUUID } });

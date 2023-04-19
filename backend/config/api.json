@@ -4,5 +4,6 @@
   "minute_limit": 1000,
   "hour_limit": 3000,
   "domain": "soundwave.mirea.xyz",
+  "data_storage_root": "/data/soundwave/",
   "secure": false
 }
