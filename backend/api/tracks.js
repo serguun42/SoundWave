@@ -10,8 +10,12 @@ import {
   RemoveTrackFromAllPlaylists,
   UnlikeTrack,
   UnlikeTrackForEveryone,
+  UpdateTrack,
 } from '../database/methods.js';
+import LogMessageOrError from '../util/log.js';
+import PullDurationFromFile from '../util/pull-duration-from-file.js';
 import ReadPayload from '../util/read-payload.js';
+import SaveUpload from '../util/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
 
 /** @type {import('../types/api').APIMethod} */
@@ -125,6 +129,66 @@ export const CreateTrack = ({ req, cookies, sendCode, sendPayload, endWithError,
         });
       }
     )
+    .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const UploadAudio = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+  if (req.method !== 'POST') {
+    sendCode(405);
+    return;
+  }
+
+  const { uuid } = queries;
+  if (!uuid || typeof uuid !== 'string') {
+    sendPayload(406, 'No uuid query');
+    return;
+  }
+
+  UserFromCookieToken(cookies)
+    .then((user) => {
+      if (!user) return endWithError(401);
+
+      return GetTrack(uuid).then((track) => {
+        if (!track) return endWithError(404);
+        if (track.owner !== user.username) return endWithError(403);
+
+        return SaveUpload(req, 'audio', uuid).then(({ received, filename }) => {
+          sendPayload(200, { received });
+
+          PullDurationFromFile(filename)
+            .then((duration) => UpdateTrack(uuid, { duration }))
+            .catch(LogMessageOrError);
+        });
+      });
+    })
+    .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const UploadTrackCover = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+  if (req.method !== 'POST') {
+    sendCode(405);
+    return;
+  }
+
+  const { uuid } = queries;
+  if (!uuid || typeof uuid !== 'string') {
+    sendPayload(406, 'No uuid query');
+    return;
+  }
+
+  UserFromCookieToken(cookies)
+    .then((user) => {
+      if (!user) return endWithError(401);
+
+      return GetTrack(uuid).then((track) => {
+        if (!track) return endWithError(404);
+        if (track.owner !== user.username) return endWithError(403);
+
+        return SaveUpload(req, 'cover', uuid).then(({ received }) => sendPayload(200, { received }));
+      });
+    })
     .catch(wrapError);
 };
 

@@ -5,5 +5,6 @@
   "hour_limit": 3000,
   "domain": "soundwave.mirea.xyz",
   "data_storage_root": "/data/soundwave/",
+  "ffprobe_path": "/usr/bin/ffprobe",
   "secure": false
 }

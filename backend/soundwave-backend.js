@@ -5,7 +5,7 @@ import mime from 'mime-types';
 import LoadConfig from './util/load-configs.js';
 import { ParseCookie, ParsePath, ParseQuery, SafeDecode, SafeURL } from './util/urls.js';
 import RateLimit from './util/rate-limit.js';
-import { ResponseError, JSONParseError } from './util/errors.js';
+import { ResponseError, JSONParseError, PayloadTooLargeError } from './util/errors.js';
 import RunAPIMethod from './api/index.js';
 import LogMessageOrError from './util/log.js';
 
@@ -45,6 +45,7 @@ const SendCode = (res, code) => {
  */
 const CatchResponse = (res, e) => {
   if (e instanceof JSONParseError) e = new ResponseError(406);
+  if (e instanceof PayloadTooLargeError) e = new ResponseError(413);
 
   if (e instanceof ResponseError) {
     SendCode(res, e.code || 500);

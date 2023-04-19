@@ -14,6 +14,7 @@ import {
   IsPlaylistLiked,
 } from '../database/methods.js';
 import ReadPayload from '../util/read-payload.js';
+import SaveUpload from '../util/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
 
 /** @type {import('../types/api').APIMethod} */
@@ -204,6 +205,33 @@ export const CreatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithErr
         });
       }
     )
+    .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const UploadPlaylistCover = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+  if (req.method !== 'POST') {
+    sendCode(405);
+    return;
+  }
+
+  const { uuid } = queries;
+  if (!uuid || typeof uuid !== 'string') {
+    sendPayload(406, 'No uuid query');
+    return;
+  }
+
+  UserFromCookieToken(cookies)
+    .then((user) => {
+      if (!user) return endWithError(401);
+
+      return GetPlaylistInfo(uuid).then((playlisy) => {
+        if (!playlisy) return endWithError(404);
+        if (playlisy.owner !== user.username) return endWithError(403);
+
+        return SaveUpload(req, 'cover', uuid).then(({ received }) => sendPayload(200, { received }));
+      });
+    })
     .catch(wrapError);
 };
 

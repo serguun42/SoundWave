@@ -27,6 +27,8 @@ export type APIConfig = {
   domain: string;
   /** Root location for audio & image files */
   data_storage_root: string;
+  /** Path to ffprobe binary exec file */
+  ffprobe_path: string;
   /** Fill this to enable TLS for local API service */
   secure?: {
     /** Location of TLS cert file */

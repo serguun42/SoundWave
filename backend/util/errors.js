@@ -9,6 +9,16 @@ export class JSONParseError extends Error {
   }
 }
 
+export class PayloadTooLargeError extends Error {
+  /**
+   * @param {number} maxSize
+   */
+  constructor(maxSize) {
+    super(`Payload is too large, was expecting ${maxSize}B at max`);
+    this.maxSize = maxSize;
+  }
+}
+
 export class ResponseError extends Error {
   /**
    * @param {number} code

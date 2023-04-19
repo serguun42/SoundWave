@@ -10,6 +10,7 @@ import {
   PlaylistInfo,
   UpdatePlaylist,
   UpdateTracksInPlaylist,
+  UploadPlaylistCover,
 } from './playlists.js';
 import {
   CreateTrack,
@@ -20,6 +21,8 @@ import {
   OwnedTracks,
   TrackInfo,
   TracksByPlaylist,
+  UploadAudio,
+  UploadTrackCover,
 } from './tracks.js';
 
 /** @type {import('../types/api').APIMethodsStorage} */
@@ -38,6 +41,7 @@ const API_METHODS_STORAGE = {
     updateInfo: UpdatePlaylist,
     updateTracks: UpdateTracksInPlaylist,
     create: CreatePlaylist,
+    uploadCover: UploadPlaylistCover,
     delete: DeletePlaylist,
     like: MarkPlaylistAsLiked,
     unlike: MarkPlaylistAsUnliked,
@@ -48,7 +52,8 @@ const API_METHODS_STORAGE = {
     info: TrackInfo,
     byPlaylist: TracksByPlaylist,
     create: CreateTrack,
-    // TODO: upload to storage
+    uploadAudio: UploadAudio,
+    uploadCover: UploadTrackCover,
     delete: DeleteTrack,
     like: MarkTrackAsLiked,
     unlike: MarkTrackAsUnliked,
