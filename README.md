@@ -1,11 +1,11 @@
-# SoundWave app
+# SoundWave
 
 Study project for music streaming app
 
-## Folders
+## Structure
 
--   [Frontend on React with Typescript](./frontend/)
--   [Backend on Node.js](./backend/)
+-   Readme for [Frontend on React with Typescript](./frontend/README.md)
+-   Readme for [Backend on Node.js](./backend/README.md)
 
 ---
 
