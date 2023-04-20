@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import LogMessageOrError from '../util/log.js';
 import UnwrapModel from '../util/unwrap-model.js';
 import sequelize from './authenticate.js';
@@ -66,6 +67,18 @@ export const DeleteSession = (sessionToken) => MODELS.SessionDB.destroy({ where:
 export const GetTrack = (uuid) => MODELS.TrackDB.findOne({ where: { uuid } }).then(UnwrapModel);
 
 /**
+ * @param {string} rx
+ * @returns {Promise<import('../types/db-models').TrackDB[]>}
+ */
+export const SearchTracksByRegexp = (rx) =>
+  MODELS.TrackDB.findAll({
+    where: {
+      [Op.or]: [{ title: { [Op.iRegexp]: rx } }, { artist_name: { [Op.iRegexp]: rx } }],
+    },
+    limit: 10,
+  }).then(UnwrapModel);
+
+/**
  * @param {import('../types/track').Track} track
  * @returns {Promise<import('../types/track').Track>}
  */
@@ -98,6 +111,18 @@ export const FindOwnedTracks = (owner, offset = 0, limit = 100) =>
  * @returns {Promise<import('../types/playlist').PlaylistInfo>}
  */
 export const GetPlaylistInfo = (uuid) => MODELS.PlaylistDB.findOne({ where: { uuid } }).then(UnwrapModel);
+
+/**
+ * @param {string} rx
+ * @returns {Promise<import('../types/db-models').PlaylistDB[]>}
+ */
+export const SearchPlaylistsByRegexp = (rx) =>
+  MODELS.PlaylistDB.findAll({
+    where: {
+      title: { [Op.iRegexp]: rx },
+    },
+    limit: 10,
+  }).then(UnwrapModel);
 
 /**
  * @param {import('../types/playlist').PlaylistInfo} playlistInfo

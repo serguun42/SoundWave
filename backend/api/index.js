@@ -13,6 +13,7 @@ import {
   UpdateTracksInPlaylist,
   UploadPlaylistCover,
 } from './playlists.js';
+import SearchByText from './search.js';
 import {
   CreateTrack,
   DeleteTrack,
@@ -24,6 +25,7 @@ import {
   TrackCover,
   TrackInfo,
   TracksByPlaylist,
+  UpdateTrackInfo,
   UploadAudio,
   UploadTrackCover,
 } from './tracks.js';
@@ -57,6 +59,7 @@ const API_METHODS_STORAGE = {
     cover: TrackCover,
     audio: TrackAudio,
     byPlaylist: TracksByPlaylist,
+    updateInfo: UpdateTrackInfo,
     create: CreateTrack,
     uploadAudio: UploadAudio,
     uploadCover: UploadTrackCover,
@@ -64,6 +67,7 @@ const API_METHODS_STORAGE = {
     like: MarkTrackAsLiked,
     unlike: MarkTrackAsUnliked,
   },
+  search: SearchByText,
 };
 
 /**

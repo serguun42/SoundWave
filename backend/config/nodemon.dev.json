@@ -3,5 +3,5 @@
 	"env": {
 		"NODE_ENV": "development"
 	},
-	"ignore": [".git", "node_modules", "out", "database"]
+	"ignore": [".git", "node_modules", "out"]
 }
