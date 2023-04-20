@@ -1,9 +1,9 @@
 import { PlaylistDB } from './db-models';
-import { TrackInPlaylist } from './track';
+import { Track } from './track';
 
 export type PlaylistInfo = PlaylistDB;
 
-export type PlaylistFull = PlaylistInfo & { tracks_in_playlist: TrackInPlaylist[] };
+export type PlaylistFull = PlaylistInfo & { tracks_in_playlist: Track[] };
 
 export type PlaylistSavingPositions = {
   /** Playlist UUID */

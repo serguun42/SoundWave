@@ -139,17 +139,18 @@ export const GetFullPlaylist = (playlistUUID) =>
     /** @returns {Promise<import('../types/playlist').PlaylistFull>} */ (fullPlaylist) =>
       Promise.resolve({
         ...UnwrapModel(fullPlaylist),
-        tracks_in_playlist: UnwrapModel(fullPlaylist.tracks_in_playlist).map((trackInPlaylist) => {
-          trackInPlaylist.position = trackInPlaylist.playlists_tracks?.position || 0;
-          delete trackInPlaylist.playlists_tracks;
-          return trackInPlaylist;
-        }),
+        tracks_in_playlist: UnwrapModel(fullPlaylist.tracks_in_playlist)
+          .sort((prev, next) => (prev.playlists_tracks?.position || 0) - (next.playlists_tracks?.position || 0))
+          .map((trackInPlaylist) => {
+            delete trackInPlaylist.playlists_tracks;
+            return trackInPlaylist;
+          }),
       })
   );
 
 /**
  * @param {string} playlistUUID
- * @returns {Promise<import('../types/track').TrackInPlaylist[]>}
+ * @returns {Promise<import('../types/track').Track[]>}
  */
 export const GetTracksByPlaylist = (playlistUUID) =>
   MODELS.PlaylistTrackDB.findAll({
@@ -160,10 +161,9 @@ export const GetTracksByPlaylist = (playlistUUID) =>
     },
     order: [['position', 'ASC']],
   }).then((tracksByPlaylist) =>
-    UnwrapModel(tracksByPlaylist).map((trackByPlaylist) => ({
-      ...UnwrapModel(trackByPlaylist.tracks_by_playlist),
-      position: trackByPlaylist.position,
-    }))
+    UnwrapModel(tracksByPlaylist)
+      .sort((prev, next) => prev.position - next.position)
+      .map((trackByPlaylist) => UnwrapModel(trackByPlaylist.tracks_by_playlist))
   );
 
 /**

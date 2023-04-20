@@ -95,7 +95,7 @@ export const TrackCover = ({ res, req, queries, sendCode, sendPayload, wrapError
 };
 
 /** @type {import('../types/api').APIMethod} */
-export const TrackAudio = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
+export const TrackAudio = ({ res, req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -107,7 +107,13 @@ export const TrackAudio = ({ res, req, queries, sendCode, sendPayload, wrapError
     return;
   }
 
-  SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'audio', uuid).catch(wrapError);
+  UserFromCookieToken(cookies)
+    .then((user) => {
+      if (!user) return endWithError(401);
+
+      return SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'audio', uuid);
+    })
+    .catch(wrapError);
 };
 
 /** @type {import('../types/api').APIMethod} */

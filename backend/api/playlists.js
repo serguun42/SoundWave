@@ -242,9 +242,9 @@ export const UploadPlaylistCover = ({ req, cookies, queries, sendCode, sendPaylo
     .then((user) => {
       if (!user) return endWithError(401);
 
-      return GetPlaylistInfo(uuid).then((playlisy) => {
-        if (!playlisy) return endWithError(404);
-        if (playlisy.owner !== user.username) return endWithError(403);
+      return GetPlaylistInfo(uuid).then((playlist) => {
+        if (!playlist) return endWithError(404);
+        if (playlist.owner !== user.username) return endWithError(403);
 
         return SaveUpload(req, 'cover', uuid).then(({ received }) => sendPayload(200, { received }));
       });

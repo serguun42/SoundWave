@@ -28,3 +28,15 @@ export class ResponseError extends Error {
     this.code = code;
   }
 }
+
+export class ResponseExtendedError extends Error {
+  /**
+   * @param {number} code
+   * @param {any} data
+   */
+  constructor(code, data) {
+    super(`Response code ${code}`);
+    this.code = code;
+    this.data = data;
+  }
+}

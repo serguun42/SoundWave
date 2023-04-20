@@ -76,8 +76,8 @@ export const SignUp = ({ req, res, sendCode, sendPayload, wrapError, endWithErro
         if (typeof credentials.username !== 'string' || typeof credentials.password !== 'string')
           return endWithError(406);
 
-        if (credentials.username.length < 6) return endWithError(422);
-        if (credentials.password.length < 14) return endWithError(417);
+        if (credentials.username.length < 6) return endWithError(422, 'Too short username');
+        if (credentials.password.length < 14) return endWithError(417, 'Too short password');
 
         return GetUser(credentials.username).then((userDB) => {
           if (userDB) return endWithError(409);

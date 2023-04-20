@@ -7,7 +7,8 @@
   "scripts": {
     "production": "pm2 start config/pm2.production.json",
     "dev": "nodemon soundwave-backend.js --config config/nodemon.dev.json",
-    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "generate-openapi-redoc": "redocly build-docs docs/api.yml -o docs/redoc.html"
   },
   "keywords": [],
   "author": "sergunu42",
@@ -20,6 +21,7 @@
     "sequelize": "^6.30.0"
   },
   "devDependencies": {
+    "@redocly/cli": "^1.0.0-beta.125",
     "eslint": "^8.37.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.8.0",
@@ -27,6 +29,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "nodemon": "^2.0.22",
     "prettier": "^2.8.7",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4"
   }
 }
