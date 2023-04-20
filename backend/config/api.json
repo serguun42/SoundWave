@@ -1,0 +1,10 @@
+{
+  "port": 6200,
+  "version": "1",
+  "minute_limit": 1000,
+  "hour_limit": 3000,
+  "domain": "soundwave.mirea.xyz",
+  "data_storage_root": "/data/soundwave/",
+  "ffprobe_path": "/usr/bin/ffprobe",
+  "secure": false
+}

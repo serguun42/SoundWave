@@ -1,0 +1,34 @@
+{
+  "name": "soundwave-backend",
+  "version": "0.1.0",
+  "description": "Backend for SoundWave project",
+  "main": "soundwave-backend.js",
+  "type": "module",
+  "scripts": {
+    "production": "pm2 start config/pm2.production.json",
+    "dev": "nodemon soundwave-backend.js --config config/nodemon.dev.json",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "generate-openapi-redoc": "redocly build-docs docs/api.yml -o docs/redoc.html"
+  },
+  "keywords": [],
+  "author": "sergunu42",
+  "license": "BSL-1.0",
+  "dependencies": {
+    "ffprobe": "^1.1.2",
+    "mime-types": "^2.1.35",
+    "pg": "^8.10.0",
+    "pm2": "^5.3.0",
+    "sequelize": "^6.30.0"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.0.0-beta.125",
+    "eslint": "^8.37.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.4"
+  }
+}
