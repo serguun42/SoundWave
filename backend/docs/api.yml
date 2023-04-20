@@ -1,0 +1,2117 @@
+openapi: 3.1.0
+
+info:
+  description: API for SoundWave project
+  version: '1.0.0'
+  contact:
+    name: SoundWave
+    url: https://soundwave.mirea.xyz
+  license:
+    name: 'BSL-1.0'
+    url: 'https://github.com/serguun42/SoundWave'
+  title: SoundWave API
+  # x-logo:
+  #   url: '/docs/logo.png'
+
+servers:
+  - description: Production, API v1.0
+    url: https://soundwave.mirea.xyz/api/v1.0/
+  - description: Development, API v1.0
+    url: https://localhost:6200/api/v1.0/
+
+tags:
+  - name: account
+    description: Account management
+  - name: playlists
+    description: Get, create, upload and manage playlists
+  - name: tracks
+    description: Get, create, upload and manage tracks
+  - name: search
+    description: Search by text for tracks & playlists
+
+paths:
+  /account/check:
+    get:
+      description: Check session
+      operationId: CheckSession
+      tags:
+        - account
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  username:
+                    type: string
+                  is_admin:
+                    type: boolean
+                example:
+                  ok: true
+                  username: vasya
+                  is_admin: false
+        '403':
+          description: Not OK – not a valid session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                example:
+                  ok: false
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+  /account/signin:
+    post:
+      description: Login with username and password
+      operationId: SingIn
+      security: []
+      tags:
+        - account
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseWithSessionToken'
+        '403':
+          description: Passwords don't match
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: User not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Login payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPayload'
+  /account/signup:
+    post:
+      description: Sing up with username and password
+      operationId: SingUp
+      security: []
+      tags:
+        - account
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseWithSessionToken'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: User not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '417':
+          description: Too short password
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '417 Expectation Failed'
+        '422':
+          description: Too short username
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '422 Unprocessable Entity'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Registering payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPayload'
+  /account/logout:
+    post:
+      description: Logout and clear session
+      operationId: Logout
+      tags:
+        - account
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                example:
+                  ok: true
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                example:
+                  ok: false
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+
+  /playlists/owned:
+    get:
+      description: List owned playlists
+      operationId: OwnedPlaylists
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Skip amount of playlists'
+        - in: query
+          name: limit
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Limit amount of playlists'
+      responses:
+        '200':
+          description: Array of owned playlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlaylistInfo'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/liked:
+    get:
+      description: List liked playlists
+      operationId: LikedPlaylists
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Skip amount of playlists'
+        - in: query
+          name: limit
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Limit amount of playlists'
+      responses:
+        '200':
+          description: Array of liked playlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlaylistInfo'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/info:
+    get:
+      description: Get playlist info
+      operationId: PlaylistInfo
+      security: []
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of playlist
+      responses:
+        '200':
+          description: Playlist info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistInfo'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/cover:
+    get:
+      description: Get playlist cover image
+      operationId: PlaylistCover
+      security: []
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of playlist
+      responses:
+        '200':
+          description: Playlist cover image as binary
+          content:
+            image/png:
+              schema:
+                type: string
+            image/jpeg:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/full:
+    get:
+      description: Playlist full
+      operationId: PlaylistFull
+      security: []
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of playlist
+      responses:
+        '200':
+          description: Full playlist with its info and tracks in order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistFull'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/updateInfo:
+    post:
+      description: Update playlist info
+      operationId: UpdatePlaylist
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Echo of updated info of playlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    $ref: '#/components/schemas/PlaylistInfo'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Partial playlist info (cannot change `uuid` or `owner`)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistInfo'
+  /playlists/updateTracks:
+    post:
+      description: Update tracks in playlist with their positions
+      operationId: UpdateTracksInPlaylist
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Set positions of tracks in playlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistSavingPositions'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Positions of tracks in playlist
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                updated:
+                  $ref: '#/components/schemas/PlaylistSavingPositions'
+  /playlists/create:
+    post:
+      description: Create playlist with info
+      operationId: CreatePlaylist
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Playlist info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    $ref: '#/components/schemas/PlaylistInfo'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Partial playlist info (cannot change `uuid` or `owner`)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaylistInfo'
+  /playlists/uploadCover:
+    post:
+      description: Upload cover image for a playlist
+      operationId: UploadPlaylistCover
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of playlist
+      responses:
+        '200':
+          description: Received size of file (in bytes)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: number
+                    description: Received size of file (in bytes)
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Binary data of an image
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+          image/jpeg:
+            schema:
+              type: string
+  /playlists/delete:
+    post:
+      description: Delete playlist by uuid
+      operationId: DeletePlaylist
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Playlist uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: string
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Playlist uuid
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+  /playlists/like:
+    post:
+      description: Like playlist by uuid
+      operationId: MarkPlaylistAsLiked
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Playlist uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  liked:
+                    type: boolean
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Playlist uuid
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+  /playlists/unlike:
+    post:
+      description: Unlike playlist by uuid
+      operationId: MarkPlaylistAsUnliked
+      tags:
+        - playlists
+      responses:
+        '200':
+          description: Playlist uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unliked:
+                    type: boolean
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Playlist uuid
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+
+  /tracks/owned:
+    get:
+      description: List owned tracks
+      operationId: OwnedTracks
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Skip amount of tracks'
+        - in: query
+          name: limit
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Limit amount of tracks'
+      responses:
+        '200':
+          description: Array of owned tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /tracks/liked:
+    get:
+      description: List liked tracks
+      operationId: LikedTracks
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Skip amount of tracks'
+        - in: query
+          name: limit
+          schema:
+            type: number
+          required: false
+          example: 100
+          description: 'Limit amount of tracks'
+      responses:
+        '200':
+          description: Array of liked tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /tracks/info:
+    get:
+      description: Track info
+      operationId: TrackInfo
+      security: []
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of track
+      responses:
+        '200':
+          description: Track info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /tracks/cover:
+    get:
+      description: Get track cover image
+      operationId: TrackCover
+      security: []
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of track
+      responses:
+        '200':
+          description: Track cover image as binary
+          content:
+            image/png:
+              schema:
+                type: string
+            image/jpeg:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /tracks/audio:
+    get:
+      description: Get track audio file
+      operationId: TrackAudio
+      security: []
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of track
+      responses:
+        '200':
+          description: Track audio file as binary
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+            audio/ogg:
+              schema:
+                type: string
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /tracks/byPlaylist:
+    get:
+      description: List tracks by playlist uuid
+      operationId: TracksByPlaylist
+      security: []
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of playlist to retrieve tracks from
+      responses:
+        '200':
+          description: Tracks in playlist sorted by their positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /tracks/updateInfo:
+    post:
+      description: Update track info
+      operationId: UpdateTrackInfo
+      tags:
+        - tracks
+      responses:
+        '200':
+          description: Echo of updated info of track
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    $ref: '#/components/schemas/Track'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Partial track info (cannot change `uuid`, `duration`, `mime_type` or `owner`)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Track'
+  /tracks/create:
+    post:
+      description: Create track
+      operationId: CreateTrack
+      tags:
+        - tracks
+      responses:
+        '200':
+          description: Track info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    $ref: '#/components/schemas/Track'
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Partial track info (cannot change `uuid`, `duration`, `mime_type` or `owner`)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Track'
+  /tracks/uploadAudio:
+    post:
+      description: Upload audio file for a track
+      operationId: UploadAudio
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of track
+      responses:
+        '200':
+          description: Received size of file (in bytes)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: number
+                    description: Received size of file (in bytes)
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Track audio file as binary
+        required: true
+        content:
+          audio/mpeg:
+            schema:
+              type: string
+          audio/ogg:
+            schema:
+              type: string
+  /tracks/uploadCover:
+    post:
+      description: Upload cover image for a track
+      operationId: UploadTrackCover
+      tags:
+        - tracks
+      parameters:
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          required: true
+          description: uuid of track
+      responses:
+        '200':
+          description: Received size of file (in bytes)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: number
+                    description: Received size of file (in bytes)
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Binary data of an image
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+          image/jpeg:
+            schema:
+              type: string
+  /tracks/delete:
+    post:
+      description: Delete track by uuid
+      operationId: DeleteTrack
+      tags:
+        - tracks
+      responses:
+        '200':
+          description: Track uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: string
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '403':
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 Forbidden'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '406 Not Acceptable'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Track uuid
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+  /tracks/like:
+    post:
+      description: Like track by uuid
+      operationId: MarkTrackAsLiked
+      tags:
+        - tracks
+      responses:
+        '200':
+          description: Playlist uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  liked:
+                    type: boolean
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Track uuid
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+  /tracks/unlike:
+    post:
+      description: Unlike track by uuid
+      operationId: MarkTrackAsUnliked
+      tags:
+        - tracks
+      responses:
+        '200':
+          description: Track uuid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  unliked:
+                    type: boolean
+        '401':
+          description: Unathorized
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '401 Unathorized'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+      requestBody:
+        description: Track uuid
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                uuid:
+                  type: string
+
+  /search:
+    get:
+      description: Search by text for tracks & playlists
+      operationId: SearchByText
+      security: []
+      tags:
+        - search
+      parameters:
+        - in: query
+          name: text
+          schema:
+            type: string
+          required: true
+          description: Text to seek tracks & playlists by
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResult'
+        '404':
+          description: Results are not found
+          content:
+            application/json:
+              schema:
+                type: array
+                const: []
+              example: []
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '406':
+          description: Not acceptable payload format (JSON-format usually)
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+
+security:
+  - cookieAuth: []
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session_token
+      description: You can login to retrieve cookies on login-page
+
+  schemas:
+    ResponseWithSessionToken:
+      type: object
+      required:
+        - session_token
+      properties:
+        session_token:
+          type: string
+      example:
+        session_token: 'abcdef10000000000012346789fcab'
+
+    UserPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: 'cooluser1337'
+        password: 'surelynotqwerty123456'
+      required:
+        - username
+        - password
+
+    Track:
+      type: object
+      additionalProperties: false
+      properties:
+        uuid:
+          type: string
+        duration:
+          type: number
+        mime_type:
+          type: string
+        owner:
+          type: string
+        title:
+          type: string
+        artist_name:
+          type: string
+      required:
+        - uuid
+        - duration
+        - mime_type
+        - owner
+        - title
+        - artist_name
+
+    PlaylistInfo:
+      type: object
+      additionalProperties: false
+      properties:
+        uuid:
+          type: string
+        sum_duration:
+          type: number
+        owner:
+          type: string
+        title:
+          type: string
+      required:
+        - uuid
+        - sum_duration
+        - owner
+        - title
+
+    PlaylistFull:
+      allOf:
+        - $ref: '#/components/schemas/PlaylistInfo'
+        - type: object
+          properties:
+            tracks_in_playlist:
+              type: array
+              items:
+                $ref: '#/components/schemas/Track'
+          required:
+            - tracks_in_playlist
+
+    PlaylistSavingPositions:
+      description: Positions of tracks in playlist
+      type: object
+      properties:
+        uuid:
+          type: string
+        positions:
+          description: uuid of tracks in desired order
+          type: array
+          items:
+            type: string
+
+    SearchResult:
+      description: Search result
+      type: object
+      properties:
+        entity:
+          type: string
+          enum:
+            - track
+            - playlist
+        uuid:
+          description: uuid of track or playlist
+          type: string
+        title:
+          type: string
+        duration:
+          description: From `duration` for tracks and `sum_durations` for playlists
+          type: number
+        artist_name:
+          type: string
+      required:
+        - entity
+        - uuid
+        - title
+        - duration
