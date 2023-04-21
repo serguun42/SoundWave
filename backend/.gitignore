@@ -4,6 +4,8 @@ node_modules/
 
 out/
 docs/*.html
+!docs/swagger.html
 
 config/*.dev.json
+config/*.local.json
 !config/nodemon.dev.json
