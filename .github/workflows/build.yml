@@ -1,0 +1,79 @@
+name: Build on push to master
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+jobs:
+
+  copy:
+    name: Delete old and copy new
+    runs-on: self-hosted
+
+    steps:
+      - name: Clear old Github Actions workspace
+        run: rm -rf $GITHUB_WORKSPACE/*
+      - uses: actions/checkout@v3
+      - name: Backup old deployment
+        run: |
+          rm -rf ~/SoundWaveOld &&
+          [ -d ~/SoundWave ] &&
+          mv ~/SoundWave ~/SoundWaveOld &&
+          echo "Moved old folder" ||
+          echo "Cannot move old folder"
+      - name: Copy fresh project
+        run: cd .. && cp -r SoundWave ~/SoundWave
+      - name: Copy production configs
+        run: |
+          [ -d ~/CONFIGS ] && for i in $(ls -1 ~/CONFIGS/*.local.json); do cp "$i" ~/SoundWave/backend/config/"$(basename ${i%%local.json})json"; done
+
+  frontend:
+    name: Deploy «frontend»
+    runs-on: self-hosted
+    needs: copy
+
+    steps:
+      - name: Install packages
+        run: cd ~/SoundWave/frontend/ && npm i --progress=false
+      - name: Build frontend
+        run: cd ~/SoundWave/frontend/ && npm run build
+      - name: Clear 'node_modules'
+        run: cd ~/SoundWave/frontend/ && rm -rf node_modules
+
+  backend:
+    name: Deploy «backend»
+    runs-on: self-hosted
+    needs: frontend
+
+    steps:
+      - name: Install packages
+        run: cd ~/SoundWave/backend/ && npm i --progress=false --omit=dev
+      - name: Delete old PM2 instance
+        run: |
+          pm2 delete soundwave-backend 2> /dev/null &&
+          echo "Process 'soundwave-backend' exited successfully" ||
+          echo "Process 'soundwave-backend' hasn't been running"
+      - name: Start new PM2 instance
+        run: cd ~/SoundWave/backend/ && npm run production
+      - name: Delete previous PM2 logs
+        run: pm2 flush
+
+  publish:
+    name: Publish build
+    runs-on: self-hosted
+    needs: backend
+
+    steps:
+      - name: Create static Redoc page on OpenAPI documentation
+        run: cd ~/SoundWave/backend/ && npm run generate-openapi-redoc
+      - name: Create Swagger-specific OpenAPI file
+        run: |
+          cp ~/SoundWave/backend/docs/api.yml ~/SoundWave/backend/docs/api-swagger-3.0.0.yml &&
+          sed -i "s/openapi: 3.1.0/openapi: 3.0.0/g" ~/SoundWave/backend/docs/api-swagger-3.0.0.yml
+      - name: Mirror backend docs to frontend
+        run: cp -r ~/SoundWave/backend/docs ~/SoundWave/frontend/dist
+      - name: Sync frontend complete with all OpenAPI docs to web server folder
+        run: rsync -ru ~/SoundWave/frontend/dist/ /HTML
