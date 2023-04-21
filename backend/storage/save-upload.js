@@ -62,7 +62,7 @@ const SaveUpload = (req, type, uuid) => {
   const filename = join(DATA_STORAGE_ROOT, type, uuid);
   const savingStream = createWriteStream(filename);
 
-  return StreamPayload(req, savingStream, type === 'audio' ? MB * 32 : MB).then((received) =>
+  return StreamPayload(req, savingStream, type === 'audio' ? MB * 16 : MB).then((received) =>
     Promise.resolve({
       received,
       filename,
