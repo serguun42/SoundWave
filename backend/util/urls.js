@@ -12,9 +12,9 @@ export const ParseCookie = (headers) => {
     const [name, ...valueParts] = cookie.split('=');
 
     try {
-      returningList[name] = decodeURIComponent(valueParts.join('='));
+      returningList[name.trim()] = decodeURIComponent(valueParts.join('=')).trim();
     } catch (e) {
-      returningList[name] = valueParts.join('=');
+      returningList[name.trim()] = valueParts.join('=').trim();
     }
   });
 

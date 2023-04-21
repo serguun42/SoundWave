@@ -1,7 +1,7 @@
 {
 	"apps": [{
-		"name"				: "gonkong-khaleesi-bot",
-		"script"			: "./gonkong-khaleesi-bot.js",
+		"name"				: "soundwave-backend",
+		"script"			: "./soundwave-backend.js",
 		"watch"				: false,
 		"append"			: true,
 		"sourceDir"			: "./",
