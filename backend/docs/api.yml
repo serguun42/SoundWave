@@ -14,10 +14,10 @@ info:
   #   url: '/docs/logo.png'
 
 servers:
-  - description: Production, API v1.0
-    url: https://soundwave.mirea.xyz/api/v1.0/
-  - description: Development, API v1.0
-    url: https://localhost:6200/api/v1.0/
+  - description: Production, API v1
+    url: https://soundwave.mirea.xyz/api/v1/
+  - description: Development, API v1
+    url: https://localhost:6200/api/v1/
 
 tags:
   - name: account
