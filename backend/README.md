@@ -23,9 +23,7 @@ See [configs.d.ts](./types/configs.d.ts) for type definitions of all parameters 
 
 ## API
 
-OpenAPI docs available at [`api.yml`](./docs/api.yml). Frontend part uses Swagger UI in runtime and precompiled Redoc `.html` bundle.
-
-- `npm run generate-openapi-redoc` – Build static Redoc page
+OpenAPI docs available at [`api.yml`](./docs/api.yml). Both Swagger and Redoc flavor documenting pages are copied to web-server on build/publish. See [`build.yml`](../.github/workflows/build.yml)
 
 ---
 

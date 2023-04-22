@@ -3,8 +3,6 @@ package-lock.json
 node_modules/
 
 out/
-docs/*.html
-!docs/swagger.html
 
 config/*.dev.json
 config/*.local.json

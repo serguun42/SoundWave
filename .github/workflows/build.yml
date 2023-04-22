@@ -67,8 +67,6 @@ jobs:
     needs: backend
 
     steps:
-      - name: Create static Redoc page on OpenAPI documentation
-        run: cd ~/SoundWave/backend/ && npm run generate-openapi-redoc
       - name: Create Swagger-specific OpenAPI file
         run: |
           cp ~/SoundWave/backend/docs/api.yml ~/SoundWave/backend/docs/api-swagger-3.0.0.yml &&
