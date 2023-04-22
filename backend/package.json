@@ -7,14 +7,12 @@
   "scripts": {
     "production": "pm2 start config/pm2.production.json",
     "dev": "nodemon soundwave-backend.js --config config/nodemon.dev.json",
-    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
-    "generate-openapi-redoc": "redocly build-docs docs/api.yml -o docs/redoc.html"
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "keywords": [],
   "author": "sergunu42",
   "license": "BSL-1.0",
   "dependencies": {
-    "@redocly/cli": "^1.0.0-beta.125",
     "ffprobe": "^1.1.2",
     "mime-types": "^2.1.35",
     "pg": "^8.10.0",
