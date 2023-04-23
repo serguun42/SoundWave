@@ -192,6 +192,13 @@ export const GetTracksByPlaylist = (playlistUUID) =>
   );
 
 /**
+ * @param {number} limit
+ * @returns {Promise<import('../types/track').Track[]>}
+ */
+export const GetRandomTracks = (limit) =>
+  MODELS.TrackDB.findAll({ limit, order: sequelize.random() }).then(UnwrapModel);
+
+/**
  * @param {import('../types/playlist').PlaylistSavingPositions} savingPositions
  * @returns {Promise}
  */
