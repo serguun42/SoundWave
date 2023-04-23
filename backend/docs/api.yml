@@ -14,9 +14,9 @@ info:
   #   url: '/docs/logo.png'
 
 servers:
-  - description: Production, API v1
+  - description: Production v1
     url: https://soundwave.mirea.xyz/api/v1/
-  - description: Development, API v1
+  - description: Development v1
     url: https://localhost:6200/api/v1/
 
 tags:
@@ -555,6 +555,56 @@ paths:
               schema:
                 type: string
                 example: 'No uuid query'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/generate:
+    get:
+      description: Generate random playlist
+      operationId: GeneratePlaylist
+      security: []
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: number
+          required: false
+          example: 10
+          description: 'Limit amount of tracks in generated playlist'
+      responses:
+        '200':
+          description: Generated full playlist with its info and tracks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaylistFull'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
         '429':
           description: Too many requests
           content:

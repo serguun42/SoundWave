@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   AddPlaylistInfo,
   RemoveAllTracksFromPlaylist,
@@ -12,6 +13,7 @@ import {
   LikePlaylist,
   UnlikePlaylist,
   IsPlaylistLiked,
+  GetRandomTracks,
 } from '../database/methods.js';
 import ReadPayload from '../util/read-payload.js';
 import SaveUpload from '../storage/save-upload.js';
@@ -94,7 +96,7 @@ export const PlaylistCover = ({ res, req, queries, sendCode, sendPayload, wrapEr
 };
 
 /** @type {import('../types/api').APIMethod} */
-export const FullPlaylist = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const PlaylistFull = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -110,6 +112,33 @@ export const FullPlaylist = ({ req, queries, sendCode, sendPayload, wrapError })
     .then((playlistFull) => {
       if (!playlistFull) sendPayload(404, { error: 'Not found' });
       else sendPayload(200, playlistFull);
+    })
+    .catch(wrapError);
+};
+
+/** @type {import('../types/api').APIMethod} */
+export const GeneratePlaylist = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+  if (req.method !== 'GET') {
+    sendCode(405);
+    return;
+  }
+
+  const limit = Math.max(Math.min(parseInt(queries.limit), 20), 0) || 10;
+
+  GetRandomTracks(limit)
+    .then((randomTracks) => {
+      if (!randomTracks) return sendPayload(404, { error: 'Not found' });
+
+      /** @type {import('../types/playlist').PlaylistFull} */
+      const generatedPlaylist = {
+        uuid: randomUUID(),
+        owner: 'You',
+        title: 'Generated playlist',
+        sum_duration: randomTracks.reduce((accum, track) => accum + track.duration || 0, 0),
+        tracks_in_playlist: randomTracks,
+      };
+
+      sendPayload(200, generatedPlaylist);
     })
     .catch(wrapError);
 };
