@@ -1,4 +1,4 @@
-export default function Auth() {
+export function Auth() {
   return (
     <div>Auth Page</div>
   );

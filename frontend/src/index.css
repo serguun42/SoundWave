@@ -4,9 +4,14 @@
   margin: 0;
   padding: 0;
   border: 0;
+  outline: none;
   box-sizing: border-box;
 }
 
 body {
-  background-color: #F2F2F2;
+  background-color: #ECF4F6;
+}
+
+ul {
+  list-style: none;
 }
