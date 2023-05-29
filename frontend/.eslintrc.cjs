@@ -10,6 +10,7 @@ module.exports = {
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
   ],
+  ignorePatterns: ['**/vite.config.ts'],
   overrides: [
   ],
   parser: '@typescript-eslint/parser',
