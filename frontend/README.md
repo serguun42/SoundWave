@@ -4,14 +4,13 @@ Client for SoundWave built with React & Typescript.
 
 ## Commands
 
-1. Install only necessary dependencies – `npm i --production`
-2. Build client with Vite – `npm run build`
+1. Build client with Vite into ./dist – `npm run build`
+2. Start a local web server that serves the built solution from ./dist - `npm run preview`
 
 ## Development
 
 -   Install all dependencies – `npm i`
--   Run in dev mode with watch-reload – `npm run dev`
--   Check with ESLint – `npm run lint`
+-   Run in dev mode with watch-reload – `npm start`
 
 ## API
 

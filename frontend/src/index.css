@@ -1,6 +1,10 @@
+@import './constants/colors.css';
+
 * {
   font-family: 'Roboto', sans-serif;
   font-size: 1rem;
+  color: var(--font-color-1);
+
   margin: 0;
   padding: 0;
   border: 0;
@@ -14,4 +18,8 @@ body {
 
 ul {
   list-style: none;
+}
+
+a {
+  text-decoration: none;
 }
