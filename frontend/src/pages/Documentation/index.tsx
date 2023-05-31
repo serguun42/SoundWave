@@ -7,7 +7,7 @@ import png6 from '../../assets/documentation/6.png';
 import png7 from '../../assets/documentation/7.png';
 import styles from './Documentation.module.css';
 
-function Documentation() {
+export function Documentation() {
   return (
     <div className={styles.contatiner}>
       <div className={styles.content}>
@@ -53,5 +53,3 @@ function Documentation() {
     </div>
   );
 }
-
-export { Documentation };

@@ -1,0 +1,17 @@
+.container {
+  display: flex;
+  gap: 40px;
+}
+
+.arrow {
+  width: 24px;
+  height: 24px;
+}
+
+.arrow:hover {
+  cursor: pointer;
+}
+
+.arrow:hover svg g path {
+  stroke: var(--font-color-1);
+}
