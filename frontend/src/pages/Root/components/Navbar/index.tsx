@@ -23,7 +23,7 @@ export function Navbar() {
         <div className={styles.navbar_category_text}>Playlists</div>
         <ul>
           <li>
-            <NavLink to="/playlist:id">
+            <NavLink to="/playlist:id"> {/* тут должен быть id плейлиста пользователя liked */}
               <img src={likedSvg} alt="liked" />
               <span>Liked</span>
             </NavLink>
