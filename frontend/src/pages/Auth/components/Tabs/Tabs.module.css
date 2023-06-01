@@ -1,0 +1,50 @@
+.wrapper {
+  width: 100%;
+  height: 48px;
+  padding: 4px;
+
+  background-color: var(--background-color-3);
+  border-radius: 10px;
+}
+
+.container {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  height: 100%;
+}
+
+.container::before {
+  cursor: pointer;
+  content: '';
+
+  position: absolute;
+  left: 0;
+
+  width: 50%;
+  height: 100%;
+
+  background-color: white;
+  border-radius: 10px;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.right_tab_selected.container::before {
+  left: 50%;
+}
+
+.button {
+  cursor: pointer;
+  display: flex;
+}
+
+.button span {
+  z-index: 1;
+
+  margin: auto;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+}

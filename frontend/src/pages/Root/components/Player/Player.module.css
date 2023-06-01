@@ -80,9 +80,13 @@
 
 .content_center_container img {
   cursor: pointer;
+  width: 24px;
+  height: 24px;
 }
 
 .volume {
   cursor: pointer;
   justify-self: end;
+  width: 24px;
+  height: 24px;
 }

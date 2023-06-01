@@ -1,5 +1,5 @@
 import { Link, NavLink } from 'react-router-dom';
-import logoSvg from '../../../../assets/logo.svg';
+import { Logo } from '../../../../components/Logo';
 import homeSvg from '../../../../assets/navbar/home.svg';
 import likedSvg from '../../../../assets/navbar/liked.svg';
 import styles from './Navbar.module.css';
@@ -8,8 +8,7 @@ export function Navbar() {
   return (
     <div className={styles.container}>
       <Link to="/" className={styles.logo_container}>
-        <img className={styles.logo_img} src={logoSvg} alt="logo" />
-        <h1 className={styles.logo_text}>SoundWave</h1>
+        <Logo />
       </Link>
       <nav className={styles.navbar}>
         <ul>

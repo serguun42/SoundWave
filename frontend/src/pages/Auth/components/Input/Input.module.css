@@ -1,0 +1,39 @@
+.container {
+  width: 100%;
+}
+
+.title {
+  display: block;
+  margin-bottom: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+}
+
+.input_container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  height: 64px;
+  padding: 0 16px;
+
+  background-color: white;
+  border: 1px solid var(--font-color-2);
+  border-radius: 10px;
+}
+
+.input {
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  line-height: 20px;
+}
+
+.input::placeholder {
+  color: var(--font-color-2);
+}
+
+.input_container img {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
