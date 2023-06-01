@@ -17,10 +17,10 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<Root />}>
         <Route index element={<Navigate to="home" />} />
-        <Route path="auth" element={<Auth />} />
         <Route path="home" element={<Home />} />
         <Route path="playlist:id" element={<Playlist />} />
       </Route>,
+      <Route path="auth" element={<Auth />} />
       <Route path="docs" element={<Documentation />} />
       <Route path="*" element={<Error />} />
     </>,

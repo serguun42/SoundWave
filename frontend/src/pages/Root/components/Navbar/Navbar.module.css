@@ -11,20 +11,8 @@
 }
 
 .logo_container {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  display: block;
   margin: 0 0 40px 24px;
-}
-
-.logo_img {
-  height: 17px;
-}
-
-.logo_text {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--accent-color);
 }
 
 .navbar ul li {
@@ -44,6 +32,7 @@
 
 .navbar a img {
   width: 22px;
+  height: 22px;
 }
 
 .navbar a span {
