@@ -8,7 +8,6 @@ import RateLimit from './util/rate-limit.js';
 import { ResponseError, JSONParseError, PayloadTooLargeError, ResponseExtendedError } from './util/errors.js';
 import RunAPIMethod from './api/index.js';
 import LogMessageOrError from './util/log.js';
-import dnsPromises from 'dns/promises';
 
 const { port, version, secure } = LoadConfig('api');
 
@@ -59,7 +58,7 @@ const CatchResponse = (res, e) => {
 };
 
 /** @type {import('http').RequestListener} */
-const ServerHandle = async (req, res) => {
+const ServerHandle = (req, res) => {
   if (RateLimit(req)) return SendCode(429);
 
   const pathname = SafeDecode(SafeURL(req.url).pathname);
@@ -72,12 +71,7 @@ const ServerHandle = async (req, res) => {
   if (path[0] !== 'api') return SendCode(res, 404);
   if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
 
-  const allowedIp = (await dnsPromises.lookup('nikolab131.ddns.net', { family: 4 })).address;
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-  if (clientIp === allowedIp) {
-    res.setHeader('Access-Control-Allow-Origin', clientIp);
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   return RunAPIMethod({
     req,
