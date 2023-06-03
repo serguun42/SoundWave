@@ -75,9 +75,9 @@ const ServerHandle = async (req, res) => {
   const allowedIp = (await dnsPromises.lookup('nikolab131.ddns.net', { family: 4 })).address;
   const clientIp = req.headers['x-forwarded-for'][0] || req.socket.remoteAddress;
 
-  if (clientIp === allowedIp) {
-    res.setHeader('Access-Control-Allow-Origin', clientIp);
-  }
+//   if (clientIp === allowedIp) {
+    res.setHeader('Access-Control-Allow-Origin', `${clientIp} ${allowedIp}`);
+//   }
 
   return RunAPIMethod({
     req,
