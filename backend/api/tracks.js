@@ -139,7 +139,7 @@ export const TracksByPlaylist = ({ req, queries, sendCode, sendPayload, wrapErro
 
 /** @type {import('../types/api').APIMethod} */
 export const UpdateTrackInfo = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
@@ -178,7 +178,7 @@ export const UpdateTrackInfo = ({ req, cookies, sendCode, sendPayload, endWithEr
 
 /** @type {import('../types/api').APIMethod} */
 export const CreateTrack = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
@@ -212,7 +212,7 @@ export const CreateTrack = ({ req, cookies, sendCode, sendPayload, endWithError,
 
 /** @type {import('../types/api').APIMethod} */
 export const UploadAudio = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
@@ -245,7 +245,7 @@ export const UploadAudio = ({ req, cookies, queries, sendCode, sendPayload, endW
 
 /** @type {import('../types/api').APIMethod} */
 export const UploadTrackCover = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
@@ -272,7 +272,7 @@ export const UploadTrackCover = ({ req, cookies, queries, sendCode, sendPayload,
 
 /** @type {import('../types/api').APIMethod} */
 export const DeleteTrack = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
@@ -302,7 +302,7 @@ export const DeleteTrack = ({ req, cookies, sendCode, sendPayload, endWithError,
 
 /** @type {import('../types/api').APIMethod} */
 export const MarkTrackAsLiked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
@@ -328,7 +328,7 @@ export const MarkTrackAsLiked = ({ req, cookies, sendCode, sendPayload, endWithE
 
 /** @type {import('../types/api').APIMethod} */
 export const MarkTrackAsUnliked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (req.method !== 'POST') {
+  if (!['POST', 'OPTIONS'].includes(req.method)) {
     sendCode(405);
     return;
   }
