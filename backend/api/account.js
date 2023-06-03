@@ -50,7 +50,7 @@ export const SignIn = ({ req, res, sendCode, sendPayload, wrapError, endWithErro
                   'Set-Cookie',
                   `session_token=${sessionToken}; Expires=${expirationDate.toUTCString()}; Path=/; Domain=${
                     LoadConfig('api').domain
-                  }; Secure`
+                  }; SameSite=None; Secure`
                 );
                 sendPayload(200, { session_token: sessionToken });
               });
@@ -105,7 +105,7 @@ export const SignUp = ({ req, res, sendCode, sendPayload, wrapError, endWithErro
                     'Set-Cookie',
                     `session_token=${sessionToken}; Expires=${expirationDate.toUTCString()}; Path=/; Domain=${
                       LoadConfig('api').domain
-                    }; Secure`
+                    }; SameSite=None; Secure`
                   );
                   sendPayload(200, { session_token: sessionToken });
                 });
@@ -131,7 +131,9 @@ export const Logout = ({ req, res, cookies, sendCode, sendPayload }) => {
       return DeleteSession(cookies.session_token).then(() => {
         res.setHeader(
           'Set-Cookie',
-          `session_token=null; Expires=${new Date(0).toUTCString()}; Path=/; Domain=${LoadConfig('api').domain}; Secure`
+          `session_token=null; Expires=${new Date(0).toUTCString()}; Path=/; Domain=${
+            LoadConfig('api').domain
+          }; SameSite=None; Secure`
         );
         sendPayload(200, { ok: true });
       });
