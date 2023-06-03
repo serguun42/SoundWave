@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'node:http';
 import { createWriteStream, WriteStream } from 'node:fs';
 import { join } from 'node:path';
 import LoadConfig from '../util/load-configs.js';
@@ -11,14 +12,9 @@ export const MB = 1024 * KB;
 
 /**
  * Pipes request payload to writing stream, manages size, returns number of bytes received
- *
- * @param {import('http').IncomingMessage} req
- * @param {WritableStream} target
- * @param {number} [maxSize=MB]
- * @returns {Promise<number>}
  */
-const StreamPayload = (req, target, maxSize = MB) =>
-  new Promise((resolve, reject) => {
+function StreamPayload(req: IncomingMessage, target: WriteStream, maxSize = MB): Promise<number> {
+  return new Promise((resolve, reject) => {
     if (!(target instanceof WriteStream)) {
       reject(new Error('Cannot write to target writable stream'));
       return;
@@ -26,8 +22,7 @@ const StreamPayload = (req, target, maxSize = MB) =>
 
     let received = 0;
 
-    /** @param {Buffer} chunk */
-    const OnDataHandle = (chunk) => {
+    const OnDataHandle = (chunk: Buffer) => {
       received += chunk.length;
 
       if (received > maxSize) {
@@ -47,16 +42,16 @@ const StreamPayload = (req, target, maxSize = MB) =>
 
     req.on('end', () => resolve(received));
   });
+}
 
 /**
  * Saves uploading file based on type & UUID, returns number of bytes received and created file
- *
- * @param {import('http').IncomingMessage} req
- * @param {'audio' | 'cover'} type
- * @param {string} uuid
- * @returns {Promise<{ received: number, filename: string }>}
  */
-const SaveUpload = (req, type, uuid) => {
+export default function SaveUpload(
+  req: IncomingMessage,
+  type: 'audio' | 'cover',
+  uuid: string
+): Promise<{ received: number; filename: string }> {
   if (type !== 'audio' && type !== 'cover') return Promise.reject(new Error('Wrong saving upload type'));
 
   const filename = join(DATA_STORAGE_ROOT, type, uuid);
@@ -68,6 +63,4 @@ const SaveUpload = (req, type, uuid) => {
       filename,
     })
   );
-};
-
-export default SaveUpload;
+}

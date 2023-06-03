@@ -7,12 +7,9 @@ const { ffprobe_path: FFPROBE_PATH } = LoadConfig('api');
 
 /**
  * Reads file with ffprobe, returns length of audiotrack in seconds. Rejects with errors
- *
- * @param {string} filename
- * @returns {Promise<{ duration: number, mimeType: string }>}
  */
-const ProbeAudioFile = (filename) =>
-  stat(filename).then(
+export default function ProbeAudioFile(filename: string): Promise<{ duration: number; mimeType: string }> {
+  return stat(filename).then(
     (stats) => {
       if (!stats.isFile()) return Promise.reject(new Error(`Pulling duration from file ${filename} – not a file`));
 
@@ -20,13 +17,12 @@ const ProbeAudioFile = (filename) =>
         const stream = probeRes?.streams?.filter((filterStream) => filterStream.codec_type === 'audio')?.[0];
         if (!stream) return Promise.reject(new Error(`Pulling duration from file ${filename} – not valid stream`));
 
-        const duration = parseFloat((parseFloat(stream.duration) || 0).toFixed(3));
-        const mimeType = mime.contentType(stream.codec_name) || 'audio/mpeg';
+        const duration = parseFloat((stream.duration || 0).toFixed(3));
+        const mimeType = mime.contentType(stream.codec_name || '') || 'audio/mpeg';
 
         return Promise.resolve({ duration, mimeType });
       });
     },
     () => Promise.reject(new Error(`Pulling duration from file ${filename} – doesn't exist`))
   );
-
-export default ProbeAudioFile;
+}

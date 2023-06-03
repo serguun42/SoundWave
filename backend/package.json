@@ -14,6 +14,7 @@
   "author": "sergunu42",
   "license": "BSL-1.0",
   "dependencies": {
+    "@types/ffprobe": "^1.1.4",
     "@types/mime-types": "^2.1.1",
     "@types/node": "^20.2.5",
     "ffprobe": "^1.1.2",

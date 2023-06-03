@@ -32,13 +32,16 @@ export type ModelsToTables = {
   [modelName in ModelNames]: string;
 };
 type Entities = ModelsToEntities[keyof ModelsToEntities];
-export type ModelFromDB<TAttributes> = import('sequelize').Model<TAttributes, TAttributes>;
+export type ModelFromDB<TAttributes extends object> = import('sequelize').Model<TAttributes, TAttributes>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
-type Association = {
+export type ForeignKeys = KeysOfUnion<ModelsToEntities[ModelNames]>;
+export type Association = {
   type: 'hasOne' | 'hasMany' | 'belongsTo' | 'belongsToMany';
   with: ModelNames;
-  foreignKey?: KeysOfUnion<ModelsToEntities[ModelNames]>;
+  foreignKey?: ForeignKeys;
+  targetKey?: ForeignKeys;
+  sourceKey?: ForeignKeys;
   through?: ModelNames;
   as?: string;
 };

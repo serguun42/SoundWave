@@ -13,11 +13,11 @@ const { data_storage_root: DATA_STORAGE_ROOT } = LoadConfig('api');
 /**
  * Saves uploading file based on type & UUID, returns number of bytes received and created file
  */
-const SendFile = (
+export default function SendFile(
   { req, res }: Pick<APIMethodParams, 'req' | 'res'>,
   type: 'audio' | 'cover',
   uuid: string
-): Promise<void> => {
+): Promise<void> {
   if (type !== 'audio' && type !== 'cover') return Promise.reject(new Error('Wrong sending file type'));
 
   const filename = join(DATA_STORAGE_ROOT, type, uuid);
@@ -70,6 +70,4 @@ const SendFile = (
     },
     () => Promise.reject(new ResponseError(404))
   );
-};
-
-export default SendFile;
+}
