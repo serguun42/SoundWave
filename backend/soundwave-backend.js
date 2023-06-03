@@ -71,7 +71,7 @@ const ServerHandle = (req, res) => {
   if (path[0] !== 'api') return SendCode(res, 404);
   if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
 
-
+  res.setHeader('Access-Control-Allow-Origin', 'nikolab131.ddns.net');
 
   return RunAPIMethod({
     req,
