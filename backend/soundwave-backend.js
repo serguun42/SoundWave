@@ -72,6 +72,10 @@ const ServerHandle = (req, res) => {
   if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
 
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Methods', '*');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '1000');
 
   return RunAPIMethod({
     req,
