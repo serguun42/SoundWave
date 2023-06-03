@@ -145,7 +145,12 @@ export const GeneratePlaylist = ({ req, queries, sendCode, sendPayload, wrapErro
 
 /** @type {import('../types/api').APIMethod} */
 export const UpdatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -184,7 +189,12 @@ export const UpdatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithErr
 
 /** @type {import('../types/api').APIMethod} */
 export const UpdateTracksInPlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -222,7 +232,12 @@ export const UpdateTracksInPlaylist = ({ req, cookies, sendCode, sendPayload, en
 
 /** @type {import('../types/api').APIMethod} */
 export const CreatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -256,7 +271,12 @@ export const CreatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithErr
 
 /** @type {import('../types/api').APIMethod} */
 export const UploadPlaylistCover = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -283,7 +303,12 @@ export const UploadPlaylistCover = ({ req, cookies, queries, sendCode, sendPaylo
 
 /** @type {import('../types/api').APIMethod} */
 export const DeletePlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -313,7 +338,12 @@ export const DeletePlaylist = ({ req, cookies, sendCode, sendPayload, endWithErr
 
 /** @type {import('../types/api').APIMethod} */
 export const MarkPlaylistAsLiked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -339,7 +369,12 @@ export const MarkPlaylistAsLiked = ({ req, cookies, sendCode, sendPayload, endWi
 
 /** @type {import('../types/api').APIMethod} */
 export const MarkPlaylistAsUnliked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
