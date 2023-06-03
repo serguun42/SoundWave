@@ -51,6 +51,8 @@ jobs:
     steps:
       - name: Install packages
         run: cd ~/SoundWave/backend/ && npm i --progress=false --omit=dev
+      - name: Compile Typescript
+        run: cd ~/SoundWave/backend/ && npm run compile
       - name: Delete old PM2 instance
         run: |
           pm2 delete soundwave-backend 2> /dev/null &&

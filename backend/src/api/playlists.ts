@@ -19,9 +19,18 @@ import ReadPayload from '../util/read-payload.js';
 import SaveUpload from '../storage/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
 import SendFile from '../storage/send-file.js';
+import { APIMethod } from '../types/api.js';
+import { Playlist, PlaylistSavingPositions, UploadingPlaylist } from '../types/entities.js';
 
-/** @type {import('../types/api').APIMethod} */
-export const OwnedPlaylists = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
+export const OwnedPlaylists: APIMethod = ({
+  req,
+  queries,
+  cookies,
+  sendCode,
+  sendPayload,
+  wrapError,
+  endWithError,
+}) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -39,8 +48,15 @@ export const OwnedPlaylists = ({ req, queries, cookies, sendCode, sendPayload, w
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const LikedPlaylists = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
+export const LikedPlaylists: APIMethod = ({
+  req,
+  queries,
+  cookies,
+  sendCode,
+  sendPayload,
+  wrapError,
+  endWithError,
+}) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -58,8 +74,7 @@ export const LikedPlaylists = ({ req, queries, cookies, sendCode, sendPayload, w
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const PlaylistInfo = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const PlaylistInfo: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -79,8 +94,7 @@ export const PlaylistInfo = ({ req, queries, sendCode, sendPayload, wrapError })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const PlaylistCover = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
+export const PlaylistCover: APIMethod = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -92,11 +106,10 @@ export const PlaylistCover = ({ res, req, queries, sendCode, sendPayload, wrapEr
     return;
   }
 
-  SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'cover', uuid).catch(wrapError);
+  SendFile({ res, req }, 'cover', uuid).catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const PlaylistFull = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const PlaylistFull: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -116,8 +129,7 @@ export const PlaylistFull = ({ req, queries, sendCode, sendPayload, wrapError })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const GeneratePlaylist = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const GeneratePlaylist: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -127,10 +139,12 @@ export const GeneratePlaylist = ({ req, queries, sendCode, sendPayload, wrapErro
 
   GetRandomTracks(limit)
     .then((randomTracks) => {
-      if (!randomTracks) return sendPayload(404, { error: 'Not found' });
+      if (!randomTracks) {
+        sendPayload(404, { error: 'Not found' });
+        return;
+      }
 
-      /** @type {import('../types/playlist').PlaylistFull} */
-      const generatedPlaylist = {
+      const generatedPlaylist: import('../types/entities.js').PlaylistFull = {
         uuid: randomUUID(),
         owner: 'You',
         title: 'Generated playlist',
@@ -143,119 +157,111 @@ export const GeneratePlaylist = ({ req, queries, sendCode, sendPayload, wrapErro
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const UpdatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const UpdatePlaylist: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/playlist').PlaylistInfo} updatingPlaylist */ (updatingPlaylist) => {
-        if (!updatingPlaylist?.uuid) return endWithError(406);
+  ReadPayload<UploadingPlaylist>(req, 'json')
+    .then((updatingPlaylist) => {
+      if (!updatingPlaylist?.uuid) return endWithError(406);
 
-        /** @type {(keyof import('../types/playlist').PlaylistInfo)[]} */
-        const updatingKeys = ['title'];
-        if (updatingKeys.some((key) => !updatingPlaylist[key])) return endWithError(406);
+      const updatingKeys: (keyof UploadingPlaylist)[] = ['title'];
+      if (updatingKeys.some((key) => !updatingPlaylist[key])) return endWithError(406);
 
-        /** @type {Partial<import('../types/playlist').PlaylistInfo>} */
-        const updatingInfo = {};
-        updatingKeys.forEach((key) => {
-          if (updatingPlaylist[key]) updatingInfo[key] = updatingPlaylist[key];
-        });
+      const updatingInfo: Partial<UploadingPlaylist> = {};
+      updatingKeys.forEach((key) => {
+        if (updatingPlaylist[key]) updatingInfo[key] = updatingPlaylist[key];
+      });
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return GetPlaylistInfo(updatingPlaylist.uuid).then((playlistFromDB) => {
-            if (!playlistFromDB) return endWithError(404);
-            if (playlistFromDB.owner !== user.username) return endWithError(403);
+        return GetPlaylistInfo(updatingPlaylist.uuid).then((playlistFromDB) => {
+          if (!playlistFromDB) return endWithError(404);
+          if (playlistFromDB.owner !== user.username) return endWithError(403);
 
-            return UpdatePlaylistInfo(updatingPlaylist.uuid, updatingInfo).then(() => {
-              sendPayload(200, { updated: updatingInfo });
-            });
+          return UpdatePlaylistInfo(updatingPlaylist.uuid, updatingInfo).then(() => {
+            sendPayload(200, { updated: updatingInfo });
           });
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const UpdateTracksInPlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const UpdateTracksInPlaylist: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/playlist').PlaylistSavingPositions} playlistSavingPositions */ (
-        playlistSavingPositions
-      ) => {
-        if (!playlistSavingPositions?.uuid) return endWithError(406);
-        if (!Array.isArray(playlistSavingPositions?.positions)) return endWithError(406);
-        if (!playlistSavingPositions.positions.every((position) => !!position && typeof position === 'string'))
-          return endWithError(406);
+  ReadPayload<PlaylistSavingPositions>(req, 'json')
+    .then((playlistSavingPositions) => {
+      if (!playlistSavingPositions?.uuid) return endWithError(406);
+      if (!Array.isArray(playlistSavingPositions?.positions)) return endWithError(406);
+      if (!playlistSavingPositions.positions.every((position) => !!position && typeof position === 'string'))
+        return endWithError(406);
 
-        playlistSavingPositions.positions = playlistSavingPositions.positions.filter(
-          (position, index, array) => index === array.indexOf(position)
-        );
+      playlistSavingPositions.positions = playlistSavingPositions.positions.filter(
+        (position, index, array) => index === array.indexOf(position)
+      );
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return GetPlaylistInfo(playlistSavingPositions.uuid).then((playlistFromDB) => {
-            if (!playlistFromDB) return endWithError(404);
-            if (playlistFromDB.owner !== user.username) return endWithError(403);
+        return GetPlaylistInfo(playlistSavingPositions.uuid).then((playlistFromDB) => {
+          if (!playlistFromDB) return endWithError(404);
+          if (playlistFromDB.owner !== user.username) return endWithError(403);
 
-            return SaveTracksByPlaylist(playlistSavingPositions).then(() => {
-              sendPayload(200, { updated: playlistSavingPositions });
-            });
+          return SaveTracksByPlaylist(playlistSavingPositions).then(() => {
+            sendPayload(200, { updated: playlistSavingPositions });
           });
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const CreatePlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const CreatePlaylist: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/playlist').PlaylistInfo} creatingPlaylist */ (creatingPlaylist) => {
-        /** @type {(keyof import('../types/playlist').PlaylistInfo)[]} */
-        const creatingKeys = ['title'];
-        if (creatingKeys.some((key) => !creatingPlaylist[key])) return endWithError(406);
+  ReadPayload<UploadingPlaylist>(req, 'json')
+    .then((creatingPlaylist) => {
+      const creatingKeys: (keyof UploadingPlaylist)[] = ['title'];
+      if (creatingKeys.some((key) => !creatingPlaylist[key])) return endWithError(406);
 
-        /** @type {Partial<import('../types/playlist').PlaylistInfo>} */
-        const creatingInfo = {};
-        creatingKeys.forEach((key) => {
-          if (creatingPlaylist[key]) creatingInfo[key] = creatingPlaylist[key];
+      const creatingInfo: Partial<Playlist> = {};
+      creatingKeys.forEach((key) => {
+        if (creatingPlaylist[key]) creatingInfo[key] = creatingPlaylist[key];
+      });
+
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
+
+        creatingInfo.owner = user.username;
+
+        return AddPlaylistInfo(creatingInfo).then((created) => {
+          sendPayload(200, { created });
         });
-
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
-
-          creatingInfo.owner = user.username;
-
-          return AddPlaylistInfo(creatingInfo).then((created) => {
-            sendPayload(200, { created });
-          });
-        });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const UploadPlaylistCover = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+export const UploadPlaylistCover: APIMethod = ({
+  req,
+  cookies,
+  queries,
+  sendCode,
+  sendPayload,
+  endWithError,
+  wrapError,
+}) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
@@ -281,84 +287,75 @@ export const UploadPlaylistCover = ({ req, cookies, queries, sendCode, sendPaylo
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const DeletePlaylist = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const DeletePlaylist: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/playlist').PlaylistInfo} deletingPlaylist */ (deletingPlaylist) => {
-        if (!deletingPlaylist?.uuid) return endWithError(406);
+  ReadPayload<UploadingPlaylist>(req, 'json')
+    .then((deletingPlaylist) => {
+      if (!deletingPlaylist?.uuid) return endWithError(406);
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return GetPlaylistInfo(deletingPlaylist.uuid).then((playlistFromDB) => {
-            if (!playlistFromDB) return endWithError(404);
-            if (playlistFromDB.owner !== user.username) return endWithError(403);
+        return GetPlaylistInfo(deletingPlaylist.uuid).then((playlistFromDB) => {
+          if (!playlistFromDB) return endWithError(404);
+          if (playlistFromDB.owner !== user.username) return endWithError(403);
 
-            return RemoveAllTracksFromPlaylist(deletingPlaylist.uuid)
-              .then(() => UnlikePlaylistForEveryone(deletingPlaylist.uuid))
-              .then(() => RemovePlaylist(deletingPlaylist.uuid))
-              .then(() => sendPayload(200, { deleted: deletingPlaylist.uuid }));
-          });
+          return RemoveAllTracksFromPlaylist(deletingPlaylist.uuid)
+            .then(() => UnlikePlaylistForEveryone(deletingPlaylist.uuid))
+            .then(() => RemovePlaylist(deletingPlaylist.uuid))
+            .then(() => sendPayload(200, { deleted: deletingPlaylist.uuid }));
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const MarkPlaylistAsLiked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const MarkPlaylistAsLiked: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/playlist').PlaylistInfo} likingPlaylist */ (likingPlaylist) => {
-        if (!likingPlaylist?.uuid) return endWithError(406);
+  ReadPayload<UploadingPlaylist>(req, 'json')
+    .then((likingPlaylist) => {
+      if (!likingPlaylist?.uuid) return endWithError(406);
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return IsPlaylistLiked(user.username, likingPlaylist.uuid).then((isLiked) => {
-            if (isLiked) return sendPayload(200, { liked: true });
+        return IsPlaylistLiked(user.username, likingPlaylist.uuid).then((isLiked) => {
+          if (isLiked) return sendPayload(200, { liked: true });
 
-            return LikePlaylist(user.username, likingPlaylist.uuid).then(() => sendPayload(200, { liked: true }));
-          });
+          return LikePlaylist(user.username, likingPlaylist.uuid).then(() => sendPayload(200, { liked: true }));
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const MarkPlaylistAsUnliked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const MarkPlaylistAsUnliked: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/playlist').PlaylistInfo} unlikingPlaylist */ (unlikingPlaylist) => {
-        if (!unlikingPlaylist?.uuid) return endWithError(406);
+  ReadPayload<UploadingPlaylist>(req, 'json')
+    .then((unlikingPlaylist) => {
+      if (!unlikingPlaylist?.uuid) return endWithError(406);
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return IsPlaylistLiked(user.username, unlikingPlaylist.uuid).then((isLiked) => {
-            if (!isLiked) return sendPayload(200, { unliked: true });
+        return IsPlaylistLiked(user.username, unlikingPlaylist.uuid).then((isLiked) => {
+          if (!isLiked) return sendPayload(200, { unliked: true });
 
-            return UnlikePlaylist(user.username, unlikingPlaylist.uuid).then(() => sendPayload(200, { unliked: true }));
-          });
+          return UnlikePlaylist(user.username, unlikingPlaylist.uuid).then(() => sendPayload(200, { unliked: true }));
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };

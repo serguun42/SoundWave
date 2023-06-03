@@ -7,18 +7,10 @@ const SHORT_DELIMITER = Array.from({ length: 30 }, () => '~').join('');
 const START_DELIMITER = Array.from({ length: 30 }, () => '🔽').join('');
 const END_DELIMITER = Array.from({ length: 30 }, () => '🔼').join('');
 
-/**
- * @param {...any} args
- * @returns {string}
- */
-const WrapForOutput = (...args) =>
+const WrapForOutput = (...args: unknown[]): string =>
   args.map((arg) => inspect(arg, { depth: Infinity, colors: true })).join(`\n${SHORT_DELIMITER}\n`);
 
-/**
- * @param  {...(string | Error)} args
- * @returns {void}
- */
-const LogMessageOrError = (...args) => {
+export default function LogMessageOrError(...args: (string | Error | unknown)[]): void {
   const containsError = args.some(
     (message) => message instanceof Error || (typeof message === 'string' && /error/i.test(message))
   );
@@ -30,7 +22,5 @@ const LogMessageOrError = (...args) => {
   out(wrapped);
   out(END_DELIMITER);
 
-  if (IS_DEV) writeFile('./out/logmessageorerror.json', JSON.stringify(args, false, '\t')).catch(console.warn);
-};
-
-export default LogMessageOrError;
+  if (IS_DEV) writeFile('./out/logmessageorerror.json', JSON.stringify(args, null, '\t')).catch(console.warn);
+}

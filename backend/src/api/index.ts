@@ -1,3 +1,4 @@
+import { APIMethod, APIMethodParams, APIMethodsStorage } from '../types/api.js';
 import { CheckSession, Logout, SignIn, SignUp } from './account.js';
 import {
   CreatePlaylist,
@@ -31,8 +32,7 @@ import {
   UploadTrackCover,
 } from './tracks.js';
 
-/** @type {import('../types/api').APIMethodsStorage} */
-const API_METHODS_STORAGE = {
+const API_METHODS_STORAGE: APIMethodsStorage = {
   account: {
     check: CheckSession,
     signin: SignIn,
@@ -72,24 +72,19 @@ const API_METHODS_STORAGE = {
   search: SearchByText,
 };
 
-/**
- * @param {string[]} path
- * @returns {import('../types/api').APIMethod | null}
- */
-const SelectMethod = (path) => {
-  let selected = API_METHODS_STORAGE;
+const SelectMethod = (path: string[]): APIMethod | null => {
+  let selected: APIMethod | APIMethodsStorage | null = API_METHODS_STORAGE;
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const part of path) {
-    selected = selected[part];
+  for (const pathPart of path) {
+    selected = (selected as APIMethodsStorage)[pathPart];
     if (!selected) return null;
   }
 
-  return selected;
+  return selected as APIMethod;
 };
 
-/** @type {import('../types/api').APIMethod} */
-const RunAPIMethod = (params) => {
+const RunAPIMethod = (params: APIMethodParams) => {
   /** Remove /api/v0/ */
   const method = SelectMethod(params.path.slice(2));
 

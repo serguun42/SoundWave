@@ -11,16 +11,13 @@ const {
 
 /**
  * Creates random HEX representation for new salt
- * @returns {string}
  */
 export const CreateSalt = () => randomBytes(saltLength).toString('hex');
 
 /**
  * Creates session token with PBKDF2
- * @param {string} username
- * @returns {Promise<string>}
  */
-export const CreateSessionToken = (username) =>
+export const CreateSessionToken = (username: string): Promise<string> =>
   new Promise((resolve, reject) => {
     pbkdf2(
       `${username}${Date.now()}`,
@@ -37,11 +34,8 @@ export const CreateSessionToken = (username) =>
 
 /**
  * Hashes password with PBKDF2
- * @param {string} password
- * @param {string} salt
- * @returns {Promise<string>}
  */
-export const HashPassword = (password, salt) =>
+export const HashPassword = (password: string, salt: string): Promise<string> =>
   new Promise((resolve, reject) => {
     pbkdf2(password, salt, iterations, passwordHashByteLength, digest, (e, derivedKey) => {
       if (e) reject(e);

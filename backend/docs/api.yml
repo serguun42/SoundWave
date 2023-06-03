@@ -297,7 +297,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PlaylistInfo'
+                  $ref: '#/components/schemas/Playlist'
         '401':
           description: Unathorized
           content:
@@ -362,7 +362,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PlaylistInfo'
+                  $ref: '#/components/schemas/Playlist'
         '401':
           description: Unathorized
           content:
@@ -401,7 +401,7 @@ paths:
   /playlists/info:
     get:
       description: Get playlist info
-      operationId: PlaylistInfo
+      operationId: Playlist
       security: []
       tags:
         - playlists
@@ -418,7 +418,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PlaylistInfo'
+                $ref: '#/components/schemas/Playlist'
         '404':
           description: Not found
           content:
@@ -634,7 +634,7 @@ paths:
                 type: object
                 properties:
                   updated:
-                    $ref: '#/components/schemas/PlaylistInfo'
+                    $ref: '#/components/schemas/Playlist'
         '401':
           description: Unathorized
           content:
@@ -683,7 +683,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlaylistInfo'
+              $ref: '#/components/schemas/Playlist'
   /playlists/updateTracks:
     post:
       description: Update tracks in playlist with their positions
@@ -764,7 +764,7 @@ paths:
                 type: object
                 properties:
                   created:
-                    $ref: '#/components/schemas/PlaylistInfo'
+                    $ref: '#/components/schemas/Playlist'
         '401':
           description: Unathorized
           content:
@@ -813,7 +813,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlaylistInfo'
+              $ref: '#/components/schemas/Playlist'
   /playlists/uploadCover:
     post:
       description: Upload cover image for a playlist
@@ -2099,7 +2099,7 @@ components:
         - title
         - artist_name
 
-    PlaylistInfo:
+    Playlist:
       type: object
       additionalProperties: false
       properties:
@@ -2119,7 +2119,7 @@ components:
 
     PlaylistFull:
       allOf:
-        - $ref: '#/components/schemas/PlaylistInfo'
+        - $ref: '#/components/schemas/Playlist'
         - type: object
           properties:
             tracks_in_playlist:

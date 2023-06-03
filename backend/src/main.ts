@@ -1,4 +1,4 @@
-import http, { STATUS_CODES } from 'node:http';
+import http, { IncomingMessage, ServerResponse, STATUS_CODES } from 'node:http';
 import https from 'node:https';
 import { readFileSync } from 'node:fs';
 import mime from 'mime-types';
@@ -11,12 +11,7 @@ import LogMessageOrError from './util/log.js';
 
 const { port, version, secure } = LoadConfig('api');
 
-/**
- * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
- * @param {number} code
- * @param {string | Buffer | Object} data
- */
-const SendPayload = (res, code, data) => {
+const SendPayload = (res: ServerResponse<IncomingMessage>, code: number, data: string | Buffer | object) => {
   res.statusCode = code;
 
   if (data instanceof Buffer || typeof data === 'string') {
@@ -24,26 +19,17 @@ const SendPayload = (res, code, data) => {
     res.end(dataToSend);
   } else {
     const dataToSend = JSON.stringify(data);
-    res.setHeader('Content-Type', mime.contentType('json'));
+    res.setHeader('Content-Type', mime.contentType('json') || '');
     res.end(dataToSend);
   }
 };
 
-/**
- * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
- * @param {number} code
- * @returns {void}
- */
-const SendCode = (res, code) => {
+const SendCode = (res: ServerResponse<IncomingMessage>, code: number) => {
   res.statusCode = code || 500;
   res.end(`${code || 500} ${STATUS_CODES[code || 500]}`);
 };
 
-/**
- * @param {import('http').ServerResponse<import('http').IncomingMessage> } res
- * @param {import('./types/api').APIError} e
- */
-const CatchResponse = (res, e) => {
+const CatchResponse = (res: ServerResponse<IncomingMessage>, e: import('./types/api.js').APIError) => {
   if (e instanceof JSONParseError) e = new ResponseExtendedError(406, 'Cannot parse JSON');
   if (e instanceof PayloadTooLargeError) e = new ResponseError(413);
 
@@ -57,16 +43,15 @@ const CatchResponse = (res, e) => {
   }
 };
 
-/** @type {import('http').RequestListener} */
-const ServerHandle = (req, res) => {
-  if (RateLimit(req)) return SendCode(429);
+const ServerListener = (req: http.IncomingMessage, res: http.ServerResponse<http.IncomingMessage>) => {
+  if (RateLimit(req)) return SendCode(res, 429);
 
   const pathname = SafeDecode(SafeURL(req.url).pathname);
   const path = ParsePath(pathname);
   const queries = ParseQuery(SafeURL(req.url).search);
   const cookies = ParseCookie(req.headers);
 
-  res.setHeader('Content-Type', mime.contentType('txt'));
+  res.setHeader('Content-Type', mime.contentType('txt') || '');
 
   if (path[0] !== 'api') return SendCode(res, 404);
   if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
@@ -94,7 +79,7 @@ if (secure?.cert && secure?.key)
         cert: readFileSync(secure.cert),
         key: readFileSync(secure.key),
       },
-      ServerHandle
+      ServerListener
     )
     .listen(port);
-else http.createServer(ServerHandle).listen(port);
+else http.createServer(ServerListener).listen(port);

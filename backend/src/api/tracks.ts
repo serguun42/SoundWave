@@ -18,9 +18,10 @@ import ReadPayload from '../util/read-payload.js';
 import SaveUpload from '../storage/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
 import SendFile from '../storage/send-file.js';
+import { APIMethod } from '../types/api.js';
+import { Track, UploadingTrack } from '../types/entities.js';
 
-/** @type {import('../types/api').APIMethod} */
-export const OwnedTracks = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
+export const OwnedTracks: APIMethod = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -38,8 +39,7 @@ export const OwnedTracks = ({ req, queries, cookies, sendCode, sendPayload, wrap
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const LikedTracks = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
+export const LikedTracks: APIMethod = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -57,8 +57,7 @@ export const LikedTracks = ({ req, queries, cookies, sendCode, sendPayload, wrap
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const TrackInfo = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const TrackInfo: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -78,8 +77,7 @@ export const TrackInfo = ({ req, queries, sendCode, sendPayload, wrapError }) =>
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const TrackCover = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
+export const TrackCover: APIMethod = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -91,11 +89,19 @@ export const TrackCover = ({ res, req, queries, sendCode, sendPayload, wrapError
     return;
   }
 
-  SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'cover', uuid).catch(wrapError);
+  SendFile({ res, req }, 'cover', uuid).catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const TrackAudio = ({ res, req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+export const TrackAudio: APIMethod = ({
+  res,
+  req,
+  cookies,
+  queries,
+  sendCode,
+  sendPayload,
+  endWithError,
+  wrapError,
+}) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -111,13 +117,12 @@ export const TrackAudio = ({ res, req, cookies, queries, sendCode, sendPayload, 
     .then((user) => {
       if (!user) return endWithError(401);
 
-      return SendFile({ res, req, queries, sendCode, sendPayload, wrapError }, 'audio', uuid);
+      return SendFile({ res, req }, 'audio', uuid);
     })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const TracksByPlaylist = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const TracksByPlaylist: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -137,81 +142,70 @@ export const TracksByPlaylist = ({ req, queries, sendCode, sendPayload, wrapErro
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const UpdateTrackInfo = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const UpdateTrackInfo: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/track').Track} updatingTrack */ (updatingTrack) => {
-        if (!updatingTrack?.uuid) return endWithError(406);
+  ReadPayload<UploadingTrack>(req, 'json')
+    .then((updatingTrack) => {
+      if (!updatingTrack?.uuid) return endWithError(406);
 
-        /** @type {(keyof import('../types/track').Track)[]} */
-        const updatingKeys = ['title', 'artist_name'];
-        if (updatingKeys.some((key) => !updatingTrack[key])) return endWithError(406);
+      const allowedUpdatingKeys: (keyof UploadingTrack)[] = ['title', 'artist_name'];
+      if (allowedUpdatingKeys.some((key) => !updatingTrack[key])) return endWithError(406);
 
-        /** @type {Partial<import('../types/track').Track>} */
-        const updatingInfo = {};
-        updatingKeys.forEach((key) => {
-          if (updatingTrack[key]) updatingInfo[key] = updatingTrack[key];
-        });
+      const updatingInfo: Partial<UploadingTrack> = {};
+      allowedUpdatingKeys.forEach((key) => {
+        if (updatingTrack[key]) updatingInfo[key] = updatingTrack[key];
+      });
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return GetTrack(updatingTrack.uuid).then((trackFromDB) => {
-            if (!trackFromDB) return endWithError(404);
-            if (trackFromDB.owner !== user.username) return endWithError(403);
+        return GetTrack(updatingTrack.uuid).then((trackFromDB) => {
+          if (!trackFromDB) return endWithError(404);
+          if (trackFromDB.owner !== user.username) return endWithError(403);
 
-            return UpdateTrack(updatingTrack.uuid, updatingInfo).then(() => {
-              sendPayload(200, { updated: updatingInfo });
-            });
+          return UpdateTrack(updatingTrack.uuid, updatingInfo).then(() => {
+            sendPayload(200, { updated: updatingInfo });
           });
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const CreateTrack = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const CreateTrack: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/track').Track} creatingTrack */ (creatingTrack) => {
-        /** @type {(keyof import('../types/track').Track)[]} */
-        const creatingKeys = ['title', 'artist_name'];
-        if (creatingKeys.some((key) => !creatingTrack[key])) return endWithError(406);
+  ReadPayload<UploadingTrack>(req, 'json')
+    .then((creatingTrack) => {
+      const allowedCreatingKeys: (keyof UploadingTrack)[] = ['title', 'artist_name'];
+      if (allowedCreatingKeys.some((key) => !creatingTrack[key])) return endWithError(406);
 
-        /** @type {Partial<import('../types/track').Track>} */
-        const creatingInfo = {};
-        creatingKeys.forEach((key) => {
-          if (creatingTrack[key]) creatingInfo[key] = creatingTrack[key];
+      const creatingInfo: Partial<Track> = {};
+      allowedCreatingKeys.forEach((key) => {
+        if (creatingTrack[key]) creatingInfo[key] = creatingTrack[key];
+      });
+
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
+
+        creatingInfo.owner = user.username;
+
+        return AddTrack(creatingInfo).then((created) => {
+          sendPayload(200, { created });
         });
-
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
-
-          creatingInfo.owner = user.username;
-
-          return AddTrack(creatingInfo).then((created) => {
-            sendPayload(200, { created });
-          });
-        });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const UploadAudio = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+export const UploadAudio: APIMethod = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
@@ -243,8 +237,15 @@ export const UploadAudio = ({ req, cookies, queries, sendCode, sendPayload, endW
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const UploadTrackCover = ({ req, cookies, queries, sendCode, sendPayload, endWithError, wrapError }) => {
+export const UploadTrackCover: APIMethod = ({
+  req,
+  cookies,
+  queries,
+  sendCode,
+  sendPayload,
+  endWithError,
+  wrapError,
+}) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
@@ -270,84 +271,75 @@ export const UploadTrackCover = ({ req, cookies, queries, sendCode, sendPayload,
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const DeleteTrack = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const DeleteTrack: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/track').Track} deletingTrack */ (deletingTrack) => {
-        if (!deletingTrack?.uuid) return endWithError(406);
+  ReadPayload<UploadingTrack>(req, 'json')
+    .then((deletingTrack) => {
+      if (!deletingTrack?.uuid) return endWithError(406);
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return GetTrack(deletingTrack.uuid).then((trackFromDB) => {
-            if (!trackFromDB) return endWithError(404);
-            if (trackFromDB.owner !== user.username) return endWithError(403);
+        return GetTrack(deletingTrack.uuid).then((trackFromDB) => {
+          if (!trackFromDB) return endWithError(404);
+          if (trackFromDB.owner !== user.username) return endWithError(403);
 
-            return RemoveTrackFromAllPlaylists(deletingTrack.uuid)
-              .then(() => UnlikeTrackForEveryone(deletingTrack.uuid))
-              .then(() => RemoveTrack(deletingTrack.uuid))
-              .then(() => sendPayload(200, { deleted: deletingTrack.uuid }));
-          });
+          return RemoveTrackFromAllPlaylists(deletingTrack.uuid)
+            .then(() => UnlikeTrackForEveryone(deletingTrack.uuid))
+            .then(() => RemoveTrack(deletingTrack.uuid))
+            .then(() => sendPayload(200, { deleted: deletingTrack.uuid }));
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const MarkTrackAsLiked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const MarkTrackAsLiked: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/track').Track} likingTrack */ (likingTrack) => {
-        if (!likingTrack?.uuid) return endWithError(406);
+  ReadPayload<UploadingTrack>(req, 'json')
+    .then((likingTrack) => {
+      if (!likingTrack?.uuid) return endWithError(406);
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return IsTrackLiked(user.username, likingTrack.uuid).then((isLiked) => {
-            if (isLiked) return sendPayload(200, { liked: true });
+        return IsTrackLiked(user.username, likingTrack.uuid).then((isLiked) => {
+          if (isLiked) return sendPayload(200, { liked: true });
 
-            return LikeTrack(user.username, likingTrack.uuid).then(() => sendPayload(200, { liked: true }));
-          });
+          return LikeTrack(user.username, likingTrack.uuid).then(() => sendPayload(200, { liked: true }));
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };
 
-/** @type {import('../types/api').APIMethod} */
-export const MarkTrackAsUnliked = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
+export const MarkTrackAsUnliked: APIMethod = ({ req, cookies, sendCode, sendPayload, endWithError, wrapError }) => {
   if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
 
-  ReadPayload(req, 'json')
-    .then(
-      /** @param {import('../types/track').Track} unlikingTrack */ (unlikingTrack) => {
-        if (!unlikingTrack?.uuid) return endWithError(406);
+  ReadPayload<UploadingTrack>(req, 'json')
+    .then((unlikingTrack) => {
+      if (!unlikingTrack?.uuid) return endWithError(406);
 
-        return UserFromCookieToken(cookies).then((user) => {
-          if (!user) return endWithError(401);
+      return UserFromCookieToken(cookies).then((user) => {
+        if (!user) return endWithError(401);
 
-          return IsTrackLiked(user.username, unlikingTrack.uuid).then((isLiked) => {
-            if (!isLiked) return sendPayload(200, { unliked: true });
+        return IsTrackLiked(user.username, unlikingTrack.uuid).then((isLiked) => {
+          if (!isLiked) return sendPayload(200, { unliked: true });
 
-            return UnlikeTrack(user.username, unlikingTrack.uuid).then(() => sendPayload(200, { unliked: true }));
-          });
+          return UnlikeTrack(user.username, unlikingTrack.uuid).then(() => sendPayload(200, { unliked: true }));
         });
-      }
-    )
+      });
+    })
     .catch(wrapError);
 };

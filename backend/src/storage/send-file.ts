@@ -6,18 +6,18 @@ import { ResponseError } from '../util/errors.js';
 import LoadConfig from '../util/load-configs.js';
 import { IsPNG, IsJPEG } from '../util/is-image.js';
 import { GetTrack } from '../database/methods.js';
+import { APIMethodParams } from '../types/api.js';
 
 const { data_storage_root: DATA_STORAGE_ROOT } = LoadConfig('api');
 
 /**
  * Saves uploading file based on type & UUID, returns number of bytes received and created file
- *
- * @param {import('../types/api').APIMethodParams} params
- * @param {'audio' | 'cover'} type
- * @param {string} uuid
- * @returns {Promise<>}
  */
-const SendFile = ({ req, res }, type, uuid) => {
+const SendFile = (
+  { req, res }: Pick<APIMethodParams, 'req' | 'res'>,
+  type: 'audio' | 'cover',
+  uuid: string
+): Promise<void> => {
   if (type !== 'audio' && type !== 'cover') return Promise.reject(new Error('Wrong sending file type'));
 
   const filename = join(DATA_STORAGE_ROOT, type, uuid);
@@ -33,7 +33,7 @@ const SendFile = ({ req, res }, type, uuid) => {
           res.setHeader('Cache-Control', 'public, max-age=604800');
           res.setHeader(
             'Content-Type',
-            mime.contentType(IsPNG(coverBuffer) ? 'png' : IsJPEG(coverBuffer) ? 'jpeg' : 'webp')
+            mime.contentType(IsPNG(coverBuffer) ? 'png' : IsJPEG(coverBuffer) ? 'jpeg' : 'webp').toString()
           );
           res.end(coverBuffer);
         });

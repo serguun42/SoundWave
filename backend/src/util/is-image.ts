@@ -4,10 +4,8 @@
  * @see https://github.com/sindresorhus/is-png
  * @author sindresorhus
  * @license MIT
- * @param {Buffer} buffer
- * @returns {boolean}
  */
-export const IsPNG = (buffer) => {
+export const IsPNG = (buffer: Buffer): boolean => {
   if (!buffer || buffer.length < 8) return false;
 
   return (
@@ -26,10 +24,8 @@ export const IsPNG = (buffer) => {
  * Check whether given buffer is a PNG
  *
  * @see https://en.wikipedia.org/wiki/List_of_file_signatures
- * @param {Buffer} buffer
- * @returns {boolean}
  */
-export const IsJPEG = (buffer) => {
+export const IsJPEG = (buffer: Buffer): boolean => {
   if (!buffer || buffer.length < 8) return false;
 
   return buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;

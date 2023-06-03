@@ -1,9 +1,8 @@
 import { DataTypes } from 'sequelize';
+import { ModelDeclarations } from '../types/db.js';
 
-/** @type {import('../types/db-models').ModelDeclarations} */
-const DECLARATIONS = {
-  UserDB: {
-    tableName: 'users',
+const DECLARATIONS: ModelDeclarations = {
+  UserModel: {
     attributes: {
       username: {
         type: DataTypes.STRING(64),
@@ -26,34 +25,33 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'hasMany',
-        with: 'SessionDB',
+        with: 'SessionModel',
         foreignKey: 'owner',
       },
       {
         type: 'hasMany',
-        with: 'TrackDB',
+        with: 'TrackModel',
         foreignKey: 'owner',
       },
       {
         type: 'hasMany',
-        with: 'PlaylistDB',
+        with: 'PlaylistModel',
         foreignKey: 'owner',
       },
       {
         type: 'hasMany',
-        with: 'TrackLikeDB',
+        with: 'TrackLikeModel',
         foreignKey: 'liker',
       },
       {
         type: 'hasMany',
-        with: 'PlaylistLikeDB',
+        with: 'PlaylistLikeModel',
         foreignKey: 'liker',
       },
     ],
   },
 
-  SessionDB: {
-    tableName: 'sessions',
+  SessionModel: {
     attributes: {
       session_token: {
         type: DataTypes.STRING(64),
@@ -76,15 +74,14 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'belongsTo',
-        with: 'UserDB',
+        with: 'UserModel',
         foreignKey: 'owner',
         as: 'session_to_user',
       },
     ],
   },
 
-  TrackDB: {
-    tableName: 'tracks',
+  TrackModel: {
     attributes: {
       uuid: {
         type: DataTypes.UUID,
@@ -120,32 +117,30 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'belongsTo',
-        with: 'UserDB',
+        with: 'UserModel',
         foreignKey: 'owner',
       },
       {
         type: 'belongsToMany',
-        with: 'PlaylistDB',
-        through: 'PlaylistTrackDB',
+        with: 'PlaylistModel',
+        through: 'PlaylistTrackModel',
         foreignKey: 'track_uuid',
       },
       {
         type: 'hasMany',
-        with: 'PlaylistTrackDB',
+        with: 'PlaylistTrackModel',
         foreignKey: 'track_uuid',
-        as: 'positions_of_track',
+        as: 'positions_of_track_in_playlists',
       },
       {
         type: 'hasMany',
-        with: 'TrackLikeDB',
+        with: 'TrackLikeModel',
         foreignKey: 'track_uuid',
-        as: 'tracks_to_likes',
       },
     ],
   },
 
-  PlaylistDB: {
-    tableName: 'playlists',
+  PlaylistModel: {
     attributes: {
       uuid: {
         type: DataTypes.UUID,
@@ -173,33 +168,31 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'belongsTo',
-        with: 'UserDB',
+        with: 'UserModel',
         foreignKey: 'owner',
       },
       {
         type: 'belongsToMany',
-        with: 'TrackDB',
-        through: 'PlaylistTrackDB',
+        with: 'TrackModel',
+        through: 'PlaylistTrackModel',
         foreignKey: 'playlist_uuid',
         as: 'tracks_in_playlist',
       },
       {
         type: 'hasMany',
-        with: 'PlaylistTrackDB',
+        with: 'PlaylistTrackModel',
         foreignKey: 'playlist_uuid',
-        as: 'positions_in_playlist',
+        as: 'positions_of_tracks_in_playlist',
       },
       {
         type: 'hasMany',
-        with: 'PlaylistLikeDB',
+        with: 'PlaylistLikeModel',
         foreignKey: 'playlist_uuid',
-        as: 'playlist_to_likes',
       },
     ],
   },
 
-  PlaylistTrackDB: {
-    tableName: 'playlists_tracks',
+  PlaylistTrackModel: {
     attributes: {
       playlist_uuid: {
         type: DataTypes.UUID,
@@ -230,13 +223,13 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'belongsTo',
-        with: 'TrackDB',
+        with: 'TrackModel',
         foreignKey: 'track_uuid',
         as: 'tracks_by_playlist',
       },
       {
         type: 'belongsTo',
-        with: 'PlaylistDB',
+        with: 'PlaylistModel',
         foreignKey: 'playlist_uuid',
         as: 'playlists_by_track',
       },
@@ -244,8 +237,7 @@ const DECLARATIONS = {
     noPrimaryKey: true,
   },
 
-  TrackLikeDB: {
-    tableName: 'tracks_likes',
+  TrackLikeModel: {
     attributes: {
       track_uuid: {
         type: DataTypes.UUID,
@@ -269,21 +261,20 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'belongsTo',
-        with: 'TrackDB',
+        with: 'TrackModel',
         foreignKey: 'track_uuid',
         as: 'like_to_track',
       },
       {
         type: 'belongsTo',
-        with: 'UserDB',
+        with: 'UserModel',
         foreignKey: 'liker',
       },
     ],
     noPrimaryKey: true,
   },
 
-  PlaylistLikeDB: {
-    tableName: 'playlists_likes',
+  PlaylistLikeModel: {
     attributes: {
       playlist_uuid: {
         type: DataTypes.UUID,
@@ -307,13 +298,13 @@ const DECLARATIONS = {
     associations: [
       {
         type: 'belongsTo',
-        with: 'PlaylistDB',
+        with: 'PlaylistModel',
         foreignKey: 'playlist_uuid',
         as: 'like_to_playlist',
       },
       {
         type: 'belongsTo',
-        with: 'UserDB',
+        with: 'UserModel',
         foreignKey: 'liker',
       },
     ],

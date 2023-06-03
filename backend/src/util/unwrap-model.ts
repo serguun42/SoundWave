@@ -1,10 +1,13 @@
-/**
- * @type {import('../types/db-models').UnwrapEntity}
- */
-const UnwrapModel = (model) => {
-  if (Array.isArray(model)) return model.map((row) => row.dataValues || row);
+import { ModelFromDB } from '../types/db.js';
 
-  return model?.dataValues || model;
-};
+export function UnwrapOne<T>(model: ModelFromDB<T> | null | undefined): T | null {
+  if (!model) return null;
+  if ('dataValues' in model) return model?.dataValues;
+  return model as T;
+}
 
-export default UnwrapModel;
+export function UnwrapMany<T>(models: ModelFromDB<T>[] | undefined): T[] {
+  if (!models) return [];
+
+  return models.map((model) => UnwrapOne(model)) as T[];
+}

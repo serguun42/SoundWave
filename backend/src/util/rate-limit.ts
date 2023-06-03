@@ -1,3 +1,4 @@
+import { IncomingMessage } from 'node:http';
 import IS_DEV from './is-dev.js';
 import LoadConfig from './load-configs.js';
 
@@ -8,10 +9,10 @@ const HOUR = MINUTE * 60;
 const { hour_limit: HOUR_CONNECTIONS_LIMIT, minute_limit: MINUTE_CONNECTIONS_LIMIT } = LoadConfig('api');
 
 /** @type {{ [ip: string]: number }} */
-const MINUTE_IPS = {};
+const MINUTE_IPS: Record<string, number> = {};
 
 /** @type {{ [ip: string]: number }} */
-const HOUR_IPS = {};
+const HOUR_IPS: Record<string, number> = {};
 
 /**
  * Returns `TRUE` if connection should be limited (via 429 Too Many Requests).
@@ -20,10 +21,12 @@ const HOUR_IPS = {};
  * @param {import('http').IncomingMessage} req
  * @returns {boolean}
  */
-const RateLimit = (req) => {
+export default function RateLimit(req: IncomingMessage) {
   if (IS_DEV) return false;
 
-  const ip = req.headers?.['x-real-ip'] || req.socket?.remoteAddress;
+  const ip = Array.isArray(req.headers?.['x-real-ip'])
+    ? req.headers?.['x-real-ip']?.[0]
+    : req.headers?.['x-real-ip'] || req.socket?.remoteAddress || '';
   if (!ip) return true;
 
   if (!MINUTE_IPS[ip]) MINUTE_IPS[ip] = 1;
@@ -39,6 +42,4 @@ const RateLimit = (req) => {
   if (HOUR_IPS[ip] > HOUR_CONNECTIONS_LIMIT) return true;
 
   return false;
-};
-
-export default RateLimit;
+}

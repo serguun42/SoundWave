@@ -1,8 +1,9 @@
 import { SearchPlaylistsByRegexp, SearchTracksByRegexp } from '../database/methods.js';
+import { APIMethod } from '../types/api.js';
+import { SearchResult } from '../types/entities.js';
 import LogMessageOrError from '../util/log.js';
 
-/** @type {import('../types/api').APIMethod} */
-const SearchByText = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+const SearchByText: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -27,8 +28,7 @@ const SearchByText = ({ req, queries, sendCode, sendPayload, wrapError }) => {
     }),
   ])
     .then(([tracks, playlists]) => {
-      /** @type {import('../types/search').SearchResult[]} */
-      const searchResults = [];
+      const searchResults: SearchResult[] = [];
 
       tracks.forEach((track) =>
         searchResults.push({

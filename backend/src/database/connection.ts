@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize';
 import LoadConfig from '../util/load-configs.js';
 import LogMessageOrError from '../util/log.js';
 
-const sequelize = new Sequelize({
+const sequelizeConnection = new Sequelize({
   dialect: 'postgres',
   ...LoadConfig('db'),
   logging: false,
@@ -11,6 +11,6 @@ const sequelize = new Sequelize({
   },
 });
 
-sequelize.authenticate().catch(LogMessageOrError);
+sequelizeConnection.authenticate().catch(LogMessageOrError);
 
-export default sequelize;
+export default sequelizeConnection;

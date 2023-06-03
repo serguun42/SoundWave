@@ -1,7 +1,7 @@
 {
 	"apps": [{
 		"name"				: "soundwave-backend",
-		"script"			: "./soundwave-backend.js",
+		"script"			: "./dist/main.js",
 		"watch"				: false,
 		"append"			: true,
 		"sourceDir"			: "./",

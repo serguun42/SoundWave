@@ -1,33 +1,27 @@
+import { IncomingMessage } from 'node:http';
 import { JSONParseError } from './errors.js';
 
-/**
- * @param {import("http").IncomingMessage} req
- * @param {"text" | "json"} [type="text"]
- * @returns {Promise<string>}
- */
-const ReadPayload = (req, type = 'text') =>
-  new Promise((resolve, reject) => {
-    const chunks = [];
+export default function ReadPayload<TReturnType = string>(
+  req: IncomingMessage,
+  payloadType: 'text' | 'json' = 'text'
+): Promise<TReturnType> {
+  return new Promise((resolve: (value: string) => void, reject) => {
+    const chunks: Buffer[] = [];
 
-    req.on('data', (chunk) => chunks.push(chunk));
+    req.on('data', (chunk: Buffer) => chunks.push(chunk));
 
     req.on('error', (e) => reject(e));
 
     req.on('end', () => resolve(Buffer.concat(chunks).toString()));
   }).then((readPayloadBody) => {
-    if (type !== 'json' && type !== 'text') type = 'text';
-
-    if (type === 'json')
-      return new Promise((resolve, reject) => {
-        try {
-          const parsedJSON = JSON.parse(readPayloadBody);
-          resolve(parsedJSON);
-        } catch (e) {
-          reject(new JSONParseError(readPayloadBody));
-        }
-      });
+    if (payloadType === 'json')
+      try {
+        const parsedJSON = JSON.parse(readPayloadBody);
+        return Promise.resolve(parsedJSON);
+      } catch (e) {
+        return Promise.reject(new JSONParseError(readPayloadBody));
+      }
 
     return Promise.resolve(readPayloadBody);
   });
-
-export default ReadPayload;
+}

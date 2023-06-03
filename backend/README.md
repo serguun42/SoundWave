@@ -13,7 +13,8 @@ See [configs.d.ts](./types/configs.d.ts) for type definitions of all parameters 
 ## Commands
 
 1. Install only necessary dependencies – `npm i --production`
-2. Run in production mode – `npm run production`
+2. Compile Typescript – `npm run compile`
+3. Run in production mode – `npm run production`
 
 ## Development
 
