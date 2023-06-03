@@ -22,7 +22,12 @@ export const CheckSession = ({ req, cookies, sendCode, sendPayload }) => {
 
 /** @type {import('../types/api').APIMethod} */
 export const SignIn = ({ req, res, sendCode, sendPayload, wrapError, endWithError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -64,7 +69,12 @@ export const SignIn = ({ req, res, sendCode, sendPayload, wrapError, endWithErro
 
 /** @type {import('../types/api').APIMethod} */
 export const SignUp = ({ req, res, sendCode, sendPayload, wrapError, endWithError }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
@@ -119,7 +129,12 @@ export const SignUp = ({ req, res, sendCode, sendPayload, wrapError, endWithErro
 
 /** @type {import('../types/api').APIMethod} */
 export const Logout = ({ req, res, cookies, sendCode, sendPayload }) => {
-  if (!['POST', 'OPTIONS'].includes(req.method)) {
+  if (req.method === 'OPTIONS') {
+    sendCode(200);
+    return;
+  }
+
+  if (req.method !== 'POST') {
     sendCode(405);
     return;
   }
