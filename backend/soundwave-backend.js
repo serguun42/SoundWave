@@ -73,11 +73,11 @@ const ServerHandle = async (req, res) => {
   if (path[1] !== `v${version}`) return SendPayload(res, 410, `Current API version is ${version}`);
 
   const allowedIp = (await dnsPromises.lookup('nikolab131.ddns.net', { family: 4 })).address;
-  const clientIp = req.headers['x-forwarded-for'][0] || req.socket.remoteAddress;
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-//   if (clientIp === allowedIp) {
-    res.setHeader('Access-Control-Allow-Origin', `${clientIp} ${allowedIp}`);
-//   }
+  if (clientIp === allowedIp) {
+    res.setHeader('Access-Control-Allow-Origin', clientIp);
+  }
 
   return RunAPIMethod({
     req,
