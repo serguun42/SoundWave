@@ -20,7 +20,7 @@ import SaveUpload from '../storage/save-upload.js';
 import UserFromCookieToken from '../util/user-from-cookie-token.js';
 import SendFile from '../storage/send-file.js';
 import { APIMethod } from '../types/api.js';
-import { Playlist, PlaylistSavingPositions, UploadingPlaylist } from '../types/entities.js';
+import { Playlist, PlaylistFull, PlaylistSavingPositions, UploadingPlaylist } from '../types/entities.js';
 
 export const OwnedPlaylists: APIMethod = ({
   req,
@@ -109,7 +109,7 @@ export const PlaylistCover: APIMethod = ({ res, req, queries, sendCode, sendPayl
   SendFile({ res, req }, 'cover', uuid).catch(wrapError);
 };
 
-export const PlaylistFull: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+export const GetPlaylistFull: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -144,7 +144,7 @@ export const GeneratePlaylist: APIMethod = ({ req, queries, sendCode, sendPayloa
         return;
       }
 
-      const generatedPlaylist: import('../types/entities.js').PlaylistFull = {
+      const generatedPlaylist: PlaylistFull = {
         uuid: randomUUID(),
         owner: 'You',
         title: 'Generated playlist',

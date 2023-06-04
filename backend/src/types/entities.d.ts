@@ -18,6 +18,8 @@ export interface Session {
 
 interface MediaEntity {
   uuid: string;
+  /** Username of uploader */
+  owner: string;
 }
 
 export interface Track extends MediaEntity {
@@ -25,8 +27,6 @@ export interface Track extends MediaEntity {
   duration: number;
   /** @default "audio/mpeg" */
   mime_type: string;
-  /** Username of uploader */
-  owner: string;
   title: string;
   artist_name: string;
 }
@@ -40,10 +40,9 @@ export type UploadingTrack = UploadingEntity<Track, 'duration' | 'mime_type' | '
 export interface Playlist extends MediaEntity {
   /** Combined duration of tracks in this playlist (in seconds) */
   sum_duration: number;
-  /** Username of uploader */
-  owner: string;
   title: string;
 }
+
 export type UploadingPlaylist = UploadingEntity<Playlist, 'sum_duration' | 'owner'>;
 
 export type PlaylistFull = Playlist & { tracks_in_playlist: Track[] };

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn, Relation } from 'typeorm';
 import { User } from '../../types/entities.js';
 import SessionModel from './session.js';
 import TrackModel from './track.js';
@@ -8,7 +8,7 @@ import PlaylistLikeModel from '../relations/playlist-like.js';
 
 @Entity('users')
 export default class UserModel implements User {
-  @PrimaryColumn({ type: 'string', length: 64 })
+  @PrimaryColumn({ type: 'varchar', length: 64 })
   declare username: string;
 
   @Column({ type: 'char', length: 128 })
@@ -20,18 +20,18 @@ export default class UserModel implements User {
   @Column({ type: 'boolean' })
   declare is_admin: boolean;
 
-  @OneToMany(() => SessionModel, (session) => session.owner)
-  declare sessions: SessionModel[];
+  @OneToMany(() => SessionModel, (session) => session.ownerUser)
+  declare sessions: Relation<SessionModel>[];
 
-  @OneToMany(() => TrackModel, (track) => track.owner)
-  declare tracks: TrackModel[];
+  @OneToMany(() => TrackModel, (track) => track.ownerUser)
+  declare tracks: Relation<TrackModel>[];
 
-  @OneToMany(() => PlaylistModel, (playlist) => playlist.owner)
-  declare playlists: PlaylistModel[];
+  @OneToMany(() => PlaylistModel, (playlist) => playlist.ownerUser)
+  declare playlists: Relation<PlaylistModel>[];
 
-  @OneToMany(() => TrackLikeModel, (trackLike) => trackLike.liker)
-  declare trackLikes: TrackLikeModel[];
+  @OneToMany(() => TrackLikeModel, (trackLike) => trackLike.likerUser)
+  declare trackLikes: Relation<TrackLikeModel>[];
 
-  @OneToMany(() => PlaylistLikeModel, (playlistLike) => playlistLike.liker)
-  declare playlistLikes: PlaylistLikeModel[];
+  @OneToMany(() => PlaylistLikeModel, (playlistLike) => playlistLike.likerUser)
+  declare playlistLikes: Relation<PlaylistLikeModel>[];
 }

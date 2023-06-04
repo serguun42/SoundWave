@@ -17,7 +17,9 @@ export default function ProbeAudioFile(filename: string): Promise<{ duration: nu
         const stream = probeRes?.streams?.filter((filterStream) => filterStream.codec_type === 'audio')?.[0];
         if (!stream) return Promise.reject(new Error(`Pulling duration from file ${filename} – not valid stream`));
 
-        const duration = parseFloat((stream.duration || 0).toFixed(3));
+        const duration = parseFloat(
+          (typeof stream.duration === 'string' ? parseFloat(stream.duration) : stream.duration || 0).toFixed(3)
+        );
         const mimeType = mime.contentType(stream.codec_name || '') || 'audio/mpeg';
 
         return Promise.resolve({ duration, mimeType });

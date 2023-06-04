@@ -3,7 +3,7 @@ import { CheckSession, Logout, SignIn, SignUp } from './account.js';
 import {
   CreatePlaylist,
   DeletePlaylist,
-  PlaylistFull,
+  GetPlaylistFull,
   GeneratePlaylist,
   LikedPlaylists,
   MarkPlaylistAsLiked,
@@ -44,7 +44,7 @@ const API_METHODS_STORAGE: APIMethodsStorage = {
     liked: LikedPlaylists,
     info: PlaylistInfo,
     cover: PlaylistCover,
-    full: PlaylistFull,
+    full: GetPlaylistFull,
     generate: GeneratePlaylist,
     updateInfo: UpdatePlaylist,
     updateTracks: UpdateTracksInPlaylist,

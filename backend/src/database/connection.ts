@@ -10,14 +10,14 @@ import PlaylistTrackModel from './relations/playlist-track.js';
 import TrackLikeModel from './relations/track-like.js';
 import PlaylistLikeModel from './relations/playlist-like.js';
 
-const dataSoureConnection = new DataSource({
+const dataSourceConnection = new DataSource({
   type: 'postgres',
   ...LoadConfig('db'),
-  logging: IS_DEV ? ['error', 'warn', 'query', 'info'] : ['error', 'warn'],
+  logging: IS_DEV ? ['error', 'warn', 'query', 'info', 'schema'] : ['error', 'warn'],
   logger: IS_DEV ? 'advanced-console' : 'simple-console',
   entities: [UserModel, SessionModel, TrackModel, PlaylistModel, PlaylistTrackModel, TrackLikeModel, PlaylistLikeModel],
 });
 
-dataSoureConnection.initialize().catch(LogMessageOrError);
+dataSourceConnection.initialize().catch(LogMessageOrError);
 
-export default dataSoureConnection;
+export default dataSourceConnection;
