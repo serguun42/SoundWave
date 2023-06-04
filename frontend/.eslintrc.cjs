@@ -44,5 +44,6 @@ module.exports = {
     'jsx-a11y/no-noninteractive-element-interactions': 'off',
     'react/no-array-index-key': 'warn',
     'import/prefer-default-export': 'off',
+    'no-param-reassign': ['error', { ignorePropertyModificationsFor: ['state'] }],
   },
 };
