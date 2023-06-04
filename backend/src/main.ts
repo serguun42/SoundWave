@@ -76,36 +76,6 @@ const ServerListener = (req: http.IncomingMessage, res: http.ServerResponse<http
     return res.end('');
   }
 
-  const accessedFromOrigin = req.headers.origin;
-  if (accessedFromOrigin && SafeURL(accessedFromOrigin).origin === accessedFromOrigin)
-    res.setHeader('Access-Control-Allow-Origin', accessedFromOrigin);
-  else res.setHeader('Access-Control-Allow-Origin', '*');
-
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Max-Age', '1000');
-
-  if (req.method === 'OPTIONS') {
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      req.headers['access-control-request-headers'] ||
-        [
-          'Content-Length',
-          'Content-Security-Policy',
-          'Content-Type',
-          'Date',
-          'Referrer-Policy',
-          'Server',
-          'Set-Cookie',
-          'Strict-Transport-Security',
-          'X-Content-Type-Options',
-          'X-Xss-Protection',
-        ].join(', ')
-    );
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.statusCode = 200;
-    return res.end('');
-  }
-
   const pathname = SafeDecode(SafeURL(req.url).pathname);
   const path = ParsePath(pathname);
   const queries = ParseQuery(SafeURL(req.url).search);
