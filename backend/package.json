@@ -1,32 +1,41 @@
 {
   "name": "soundwave-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Backend for SoundWave project",
-  "main": "soundwave-backend.js",
+  "main": "src/main.ts",
   "type": "module",
   "scripts": {
-    "production": "pm2 start config/pm2.production.json",
-    "dev": "nodemon soundwave-backend.js --config config/nodemon.dev.json",
-    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+    "dev": "nodemon src/main.ts --config config/nodemon.dev.json",
+    "lint": "eslint . --ext .ts,.js,.cjs,.mjs --fix --ignore-path .gitignore",
+    "compile": "tsc --project tsconfig.json",
+    "production": "pm2 start config/pm2.production.json"
   },
   "keywords": [],
   "author": "sergunu42",
   "license": "BSL-1.0",
   "dependencies": {
+    "@types/ffprobe": "^1.1.4",
+    "@types/mime-types": "^2.1.1",
+    "@types/node": "^20.2.5",
     "ffprobe": "^1.1.2",
     "mime-types": "^2.1.35",
-    "pg": "^8.10.0",
+    "pg": "^8.11.0",
     "pm2": "^5.3.0",
-    "sequelize": "^6.30.0"
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.3.16",
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
-    "eslint": "^8.37.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "eslint": "^8.41.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
     "nodemon": "^2.0.22",
-    "prettier": "^2.8.7",
-    "typescript": "^5.0.4"
+    "prettier": "^2.8.8",
+    "ts-node": "^10.9.1"
   }
 }
