@@ -5,6 +5,7 @@ import {
   createRoutesFromElements,
   RouterProvider,
 } from 'react-router-dom';
+import { Spinner } from './components/Spinner';
 import { Root } from './pages/Root';
 import { Auth } from './pages/Auth';
 import { Documentation } from './pages/Documentation';
@@ -12,24 +13,27 @@ import { Home } from './pages/Home';
 import { Playlist } from './pages/Playlist';
 import { Error } from './pages/Error';
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <>
-      <Route path="/" element={<Root />}>
-        <Route index element={<Navigate to="home" />} />
-        <Route path="home" element={<Home />} />
-        <Route path="playlist:id" element={<Playlist />} />
-      </Route>,
-      <Route path="auth" element={<Auth />} />
-      <Route path="docs" element={<Documentation />} />
-      <Route path="*" element={<Error />} />
-    </>,
-  ),
-);
-
 function App() {
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <>
+        <Route path="/" element={<Root />}>
+          <Route index element={<Navigate to="home" />} />
+          <Route path="home" element={<Home />} />
+          <Route path="playlist:id" element={<Playlist />} />
+        </Route>,
+        <Route path="auth" element={<Auth />} />
+        <Route path="docs" element={<Documentation />} />
+        <Route path="*" element={<Error />} />
+      </>,
+    ),
+  );
+
   return (
-    <RouterProvider router={router} />
+    <>
+      <RouterProvider router={router} />
+      <Spinner />
+    </>
   );
 }
 

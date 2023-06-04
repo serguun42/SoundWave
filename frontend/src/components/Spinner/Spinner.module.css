@@ -1,0 +1,35 @@
+.container {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+
+  display: flex;
+
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgb(255 255 255 / 50%);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  margin: auto;
+
+  border: 4px solid var(--accent-color-1);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+
+  animation: rotation 0.7s linear infinite;
+  }
+
+  @keyframes rotation {
+  from {
+      transform: rotate(0deg);
+  }
+
+  to {
+      transform: rotate(360deg);
+  }
+}

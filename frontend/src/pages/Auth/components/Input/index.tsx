@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import eyeHideSvg from '../../../../assets/auth/eye_hide.svg';
 import eyeShowSvg from '../../../../assets/auth/eye_show.svg';
 import styles from './Input.module.css';
@@ -9,9 +9,15 @@ type Props = {
   placeholder?: string;
 };
 
-export function Input({ type, title, placeholder }: Props) {
+export type InputHandle = {
+  value: () => string | undefined;
+};
+
+export const Input = forwardRef<InputHandle, Props>(function Input({ type, title, placeholder }, ref) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isPasswordShow, setIsPasswordShow] = useState(false);
+
+  useImperativeHandle(ref, () => ({ value: () => inputRef.current?.value }));
 
   const onContainerClick = () => {
     const inputElement = inputRef.current;
@@ -53,4 +59,4 @@ export function Input({ type, title, placeholder }: Props) {
       </div>
     </div>
   );
-}
+});
