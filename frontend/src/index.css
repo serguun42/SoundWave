@@ -15,7 +15,7 @@
 }
 
 body {
-  background-color: #ECF4F6;
+  background-color: var(--background-color-1);
 }
 
 ul {

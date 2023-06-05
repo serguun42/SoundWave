@@ -4,7 +4,7 @@ import { CheckResult, LoginRegisterPayload } from './types';
 export const check = createAsyncThunk<CheckResult>(
   'auth/check',
   async () => {
-    const response = await fetch('/api/v1/account/check', { credentials: 'include' });
+    const response = await fetch('/api/v1/account/check');
     const data = await response.json();
     return data;
   },
@@ -15,7 +15,6 @@ export const login = createAsyncThunk<undefined, LoginRegisterPayload>(
   async (payload, { rejectWithValue }) => {
     const response = await fetch('/api/v1/account/signin', {
       method: 'POST',
-      credentials: 'include',
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
@@ -34,7 +33,6 @@ export const register = createAsyncThunk<undefined, LoginRegisterPayload>(
   async (payload, { rejectWithValue }) => {
     const response = await fetch('/api/v1/account/signup', {
       method: 'POST',
-      credentials: 'include',
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },

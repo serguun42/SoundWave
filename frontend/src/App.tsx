@@ -10,6 +10,7 @@ import { Root } from './pages/Root';
 import { Auth } from './pages/Auth';
 import { Documentation } from './pages/Documentation';
 import { Home } from './pages/Home';
+import { LikedPlaylists } from './pages/LikedPlaylists';
 import { Playlist } from './pages/Playlist';
 import { Error } from './pages/Error';
 
@@ -20,7 +21,8 @@ function App() {
         <Route path="/" element={<Root />}>
           <Route index element={<Navigate to="home" />} />
           <Route path="home" element={<Home />} />
-          <Route path="playlist:id" element={<Playlist />} />
+          <Route path="likedPlaylists" element={<LikedPlaylists />} />
+          <Route path="playlist/:type" element={<Playlist />} />
         </Route>,
         <Route path="auth" element={<Auth />} />
         <Route path="docs" element={<Documentation />} />

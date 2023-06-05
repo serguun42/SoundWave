@@ -1,4 +1,8 @@
 :root {
+  --top-padding: 64px;
   --side-padding: 96px;
+  --playlist-side-padding: 288px;
+
   --playlist-card-image-size: 250px;
+  --track-image-size: 40px;
 }
