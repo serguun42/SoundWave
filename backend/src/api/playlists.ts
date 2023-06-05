@@ -14,6 +14,7 @@ import {
   UnlikePlaylist,
   IsPlaylistLiked,
   GetRandomTracks,
+  GetAllNonEmptyPlaylists,
 } from '../database/methods.js';
 import ReadPayload from '../util/read-payload.js';
 import SaveUpload from '../storage/save-upload.js';
@@ -153,6 +154,26 @@ export const GeneratePlaylist: APIMethod = ({ req, queries, sendCode, sendPayloa
       };
 
       sendPayload(200, generatedPlaylist);
+    })
+    .catch(wrapError);
+};
+
+export const RecommendPlaylists: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
+  if (req.method !== 'GET') {
+    sendCode(405);
+    return;
+  }
+
+  const limit = Math.max(Math.min(parseInt(queries.limit), 20), 0) || 10;
+
+  GetAllNonEmptyPlaylists(limit)
+    .then((playlists) => {
+      if (!playlists?.length) {
+        sendPayload(404, { error: 'Not found' });
+        return;
+      }
+
+      sendPayload(200, playlists);
     })
     .catch(wrapError);
 };

@@ -1,4 +1,4 @@
-import { ILike } from 'typeorm';
+import { ILike, MoreThan } from 'typeorm';
 import LogMessageOrError from '../util/log.js';
 import REPOSITORY from './repository.js';
 import dataSourceConnection from './connection.js';
@@ -64,6 +64,9 @@ export const FindOwnedTracks = (owner: string, offset = 0, limit = 100) =>
   TrackRepo.find({ where: { owner }, skip: offset, take: limit });
 
 export const GetPlaylistInfo = (uuid: string) => PlaylistRepo.findOne({ where: { uuid } });
+
+export const GetAllNonEmptyPlaylists = (limit = 100) =>
+  PlaylistRepo.find({ where: { sum_duration: MoreThan(0) }, take: limit });
 
 export const SearchPlaylistsByRegexp = (rx: string) =>
   PlaylistRepo.find({

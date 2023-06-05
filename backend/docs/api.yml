@@ -280,14 +280,14 @@ paths:
           schema:
             type: number
           required: false
-          example: 100
+          example: 0
           description: 'Skip amount of playlists'
         - in: query
           name: limit
           schema:
             type: number
           required: false
-          example: 100
+          example: 10
           description: 'Limit amount of playlists'
       responses:
         '200':
@@ -345,14 +345,14 @@ paths:
           schema:
             type: number
           required: false
-          example: 100
+          example: 0
           description: 'Skip amount of playlists'
         - in: query
           name: limit
           schema:
             type: number
           required: false
-          example: 100
+          example: 10
           description: 'Limit amount of playlists'
       responses:
         '200':
@@ -591,6 +591,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlaylistFull'
+        '404':
+          description: Not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '404 Not Found'
+        '405':
+          description: Method Not Allowed
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '405 Method Not Allowed'
+        '429':
+          description: Too many requests
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '429 Too many requests'
+        '500':
+          description: Some (un)expected error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '500 Internal Server Error'
+  /playlists/recommend:
+    get:
+      description: Get recommended playlists for home page
+      operationId: RecommendPlaylists
+      security: []
+      tags:
+        - playlists
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: number
+          required: false
+          example: 10
+          description: 'Limit amount of recommended playlist'
+      responses:
+        '200':
+          description: Recommended playlists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Playlist'
         '404':
           description: Not found
           content:
@@ -1121,14 +1173,14 @@ paths:
           schema:
             type: number
           required: false
-          example: 100
+          example: 0
           description: 'Skip amount of tracks'
         - in: query
           name: limit
           schema:
             type: number
           required: false
-          example: 100
+          example: 10
           description: 'Limit amount of tracks'
       responses:
         '200':
@@ -1186,14 +1238,14 @@ paths:
           schema:
             type: number
           required: false
-          example: 100
+          example: 0
           description: 'Skip amount of tracks'
         - in: query
           name: limit
           schema:
             type: number
           required: false
-          example: 100
+          example: 10
           description: 'Limit amount of tracks'
       responses:
         '200':
