@@ -14,6 +14,7 @@ import {
   UpdatePlaylist,
   UpdateTracksInPlaylist,
   UploadPlaylistCover,
+  RecommendPlaylists,
 } from './playlists.js';
 import SearchByText from './search.js';
 import {
@@ -46,6 +47,7 @@ const API_METHODS_STORAGE: APIMethodsStorage = {
     cover: PlaylistCover,
     full: GetPlaylistFull,
     generate: GeneratePlaylist,
+    recommend: RecommendPlaylists,
     updateInfo: UpdatePlaylist,
     updateTracks: UpdateTracksInPlaylist,
     create: CreatePlaylist,
