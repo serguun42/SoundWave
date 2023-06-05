@@ -1,23 +1,26 @@
-import { Card } from './components/Card';
-import pianoJpg from '../../assets/home/piano.jpg';
-import minionInWaterJpg from '../../assets/home/minion_in_water.jpg';
-import womanWithLaptopJpg from '../../assets/home/woman_with_laptop.jpg';
-import sunsetPalmsJpg from '../../assets/home/sunset_palms.jpg';
-import flamingoOnWaterJpg from '../../assets/home/flamingo_on_water.jpg';
-import styles from './Home.module.css';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { ownedPlaylistsSelector, recommendPlaylistsSelector } from '../../redux/slices/playlists/selectors';
+import { useAppDispatch } from '../../hooks/redux';
+import { fetchOwnedPlaylists, fetchRecommendPlaylists } from '../../redux/slices/playlists/thunks';
+import { Playlists } from '../Playlists';
 
 export function Home() {
+  const dispatch = useAppDispatch();
+
+  const recommendPlaylists = useSelector(recommendPlaylistsSelector);
+  const ownedPlaylists = useSelector(ownedPlaylistsSelector);
+
+  useEffect(() => {
+    dispatch(fetchRecommendPlaylists());
+    dispatch(fetchOwnedPlaylists());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <section className={styles.cards_container}>
-      <h2 className={styles.title}>Trending now</h2>
-      <Card imgSrc={pianoJpg} title="Peacful Piano" subtitle="Playlist" />
-      <Card imgSrc={minionInWaterJpg} title="Chill" subtitle="Playlist" />
-      <Card imgSrc={womanWithLaptopJpg} title="Focus Flow" subtitle="Playlist" />
-      <Card imgSrc={sunsetPalmsJpg} title="Jazz Hits" subtitle="Playlist" />
-      <Card imgSrc={flamingoOnWaterJpg} title="Summer" subtitle="Playlist" />
-      <Card title="Test 1" subtitle="Something 1" />
-      <Card title="Test 2" subtitle="Something 2" />
-      <Card title="Test 3" subtitle="Something 3" />
-    </section>
+    <>
+      {recommendPlaylists && <Playlists title="Trending now" playlists={recommendPlaylists} />}
+      {ownedPlaylists && <Playlists title="Your playlists" playlists={ownedPlaylists} />}
+    </>
   );
 }

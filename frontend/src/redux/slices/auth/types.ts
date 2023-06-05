@@ -13,3 +13,8 @@ export type LoginRegisterPayload = {
   username: string;
   password: string;
 };
+
+export type AuthState = {
+  selectedTab: SelectedTab,
+  isLoading: boolean,
+};

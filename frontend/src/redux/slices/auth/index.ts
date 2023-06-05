@@ -1,8 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { SelectedTab } from './types';
+import { AuthState, SelectedTab } from './types';
 import { check, login, register } from './thunks';
 
-const initialState = {
+const initialState: AuthState = {
   selectedTab: SelectedTab.left,
   isLoading: false,
 };
