@@ -5,4 +5,7 @@
 
   --playlist-card-image-size: 250px;
   --track-image-size: 40px;
+
+  --player-timeline-height: 16px;
+  --player-content-height: 80px;
 }

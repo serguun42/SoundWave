@@ -6,6 +6,8 @@ export const fetchPlaylistCover = createAsyncThunk<string, string>(
   'playlists/fetchPlaylistCover',
   async payload => {
     const response = await fetch(`/api/v1/playlists/cover?uuid=${payload}`);
+
+    if (!response.ok) return '';
     const data = await response.blob();
     return URL.createObjectURL(data);
   },

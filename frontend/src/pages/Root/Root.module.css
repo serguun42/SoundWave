@@ -5,3 +5,9 @@
 .content_wrapper {
   width: 100%;
 }
+
+.main::after {
+  content: '';
+  display: block;
+  height: calc(var(--player-timeline-height) + var(--player-content-height));
+}

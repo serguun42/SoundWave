@@ -1,4 +1,6 @@
-import { useState } from 'react';
+/* eslint-disable jsx-a11y/media-has-caption */
+import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import heartFillSvg from '../../../../assets/player/heart_fill.svg';
 import heartOutlineSvg from '../../../../assets/player/heart_outline.svg';
 import playSvg from '../../../../assets/player/play.svg';
@@ -9,42 +11,135 @@ import volumeMuteSvg from '../../../../assets/player/volume_mute.svg';
 import volumeLowSvg from '../../../../assets/player/volume_low.svg';
 import volumeHighSvg from '../../../../assets/player/volume_high.svg';
 import styles from './Player.module.css';
+import { useAppDispatch } from '../../../../hooks/redux';
+import { markTrackAsLiked, markTrackAsUnliked } from '../../../../redux/slices/tracks/thunks';
+import { isTrackPlayingSelector, playingInfoSelector } from '../../../../redux/slices/tracks/selectors';
+import { setIsPlaying } from '../../../../redux/slices/tracks';
+import { convertSecondsToString } from '../../../../helpers';
 
 export function Player() {
+  const dispatch = useAppDispatch();
+
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const volumeRef = useRef<HTMLInputElement>(null);
+  const playingInfo = useSelector(playingInfoSelector);
+  const isPlaying = useSelector(isTrackPlayingSelector);
+
+  const [currentTime, setCurrentTime] = useState('0:00');
   const [isLiked, setIsLiked] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  const onTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(convertSecondsToString(audioRef.current.currentTime));
+    }
+  };
 
   const onLikeClick = () => {
-    setIsLiked(prev => !prev);
+    dispatch(markTrackAsLiked(playingInfo.uuid));
+    setIsLiked(true);
+  };
+
+  const onUnlikeClick = () => {
+    dispatch(markTrackAsUnliked(playingInfo.uuid));
+    setIsLiked(false);
   };
 
   const onPlayClick = () => {
-    setIsPlaying(prev => !prev);
+    if (isPlaying) {
+      dispatch(setIsPlaying(false));
+    } else {
+      dispatch(setIsPlaying(true));
+    }
+  };
+
+  useEffect(() => {
+    if (isPlaying) {
+      audioRef.current?.play();
+    } else {
+      audioRef.current?.pause();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    setIsLiked(playingInfo.isLiked);
+  }, [playingInfo.isLiked]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+    }
+  }, [audioRef.current]);
+
+  const [isVolumeHover, setIsVolumeHover] = useState(false);
+
+  const onMouseEnter = () => {
+    setIsVolumeHover(true);
+  };
+
+  const onMouseLeave = () => {
+    setIsVolumeHover(false);
+  };
+
+  const [volumeImage, setVolumeImage] = useState<string>(volumeLowSvg);
+
+  const onVolumeChange = () => {
+    if (volumeRef.current && audioRef.current) {
+      const percent = Number(volumeRef.current.value) - 1;
+      volumeRef.current.style.background = `linear-gradient(90deg, #4D9FC4 ${percent}%, #BACED980 ${percent}%)`;
+
+      audioRef.current.volume = Number(volumeRef.current.value) / 100;
+
+      if (audioRef.current.volume === 0) {
+        setVolumeImage(volumeMuteSvg);
+      } else if (audioRef.current.volume >= 0.7) {
+        setVolumeImage(volumeHighSvg);
+      } else {
+        setVolumeImage(volumeLowSvg);
+      }
+    }
   };
 
   return (
     <section className={styles.container}>
+      <audio src={playingInfo.src} ref={audioRef} onTimeUpdate={onTimeUpdate} />
       <div className={styles.timeline}>
-        <span>0:00</span>
-        <span>2:28</span>
+        <span>{currentTime}</span>
+        <span>{convertSecondsToString(playingInfo.duration)}</span>
       </div>
       <div className={styles.content}>
         <div className={styles.content_left_container}>
           <div className={styles.image_container}>
-            <img src="" alt="" />
+            {playingInfo.coverSrc && <img src={playingInfo.coverSrc} alt="" />}
           </div>
           <div className={styles.title_container}>
-            <h2 className={styles.title}>Test title</h2>
-            <h3 className={styles.subtitle}>Test artist</h3>
+            <h2 className={styles.title}>{playingInfo.title}</h2>
+            <h3 className={styles.subtitle}>{playingInfo.artist_name}</h3>
           </div>
-          <img className={styles.like} src={isLiked ? heartFillSvg : heartOutlineSvg} alt="" onClick={onLikeClick} />
+          {isLiked ?
+            <img className={styles.like} src={heartFillSvg} alt="" onClick={onUnlikeClick} /> :
+            <img className={styles.like} src={heartOutlineSvg} alt="" onClick={onLikeClick} />}
         </div>
         <div className={styles.content_center_container}>
           <img src={skipPreviousSvg} alt="" />
           <img src={isPlaying ? pauseSvg : playSvg} alt="" onClick={onPlayClick} />
           <img src={skipNextSvg} alt="" />
         </div>
-        <img className={styles.volume} src={volumeHighSvg} alt="" />
+        <div className={styles.volume_container} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+          <img className={styles.volume} src={volumeImage} alt="" />
+          <div className={styles.volume_bar_wrapper} style={{ display: isVolumeHover ? 'block' : 'none' }}>
+            <div className={styles.volume_bar_container}>
+              <input
+                className={styles.volume_bar}
+                type="range"
+                min={0}
+                max={100}
+                defaultValue={audioRef.current ? Number(audioRef.current.volume) * 100 : 50}
+                onInput={onVolumeChange}
+                ref={volumeRef}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
