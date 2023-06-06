@@ -1,6 +1,13 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TracksState } from './types';
-import { fetchTrackCover, fetchLikedTracks, markTrackAsLiked, markTrackAsUnliked, fetchTrackAudio } from './thunks';
+import {
+  fetchTrackCover,
+  fetchLikedTracks,
+  markTrackAsLiked,
+  markTrackAsUnliked,
+  fetchTrackAudio,
+  fetchTracksByPlaylist,
+} from './thunks';
 // eslint-disable-next-line import/no-relative-packages
 
 const initialState: TracksState = {
@@ -8,6 +15,7 @@ const initialState: TracksState = {
   isPlaying: false,
   isUuidLoading: false,
   playingInfo: { src: '', coverSrc: '', isLiked: false, uuid: '', duration: 0, title: '', artist_name: '' },
+  currentTracks: [],
   likedTracks: [],
 };
 
@@ -17,6 +25,9 @@ const slice = createSlice({
   reducers: {
     setIsPlaying(state, action: PayloadAction<boolean>) {
       state.isPlaying = action.payload;
+    },
+    clearCurrentTracks(state) {
+      state.currentTracks = [];
     },
   },
   extraReducers: builder => {
@@ -32,12 +43,14 @@ const slice = createSlice({
       })
       .addCase(fetchTrackAudio.pending, state => {
         state.isLoading = true;
+        state.isPlaying = false;
       })
       .addCase(fetchTrackAudio.fulfilled, (state, action) => {
         state.isLoading = false;
         if (action.payload) {
           state.playingInfo = action.payload;
           state.isUuidLoading = false;
+          state.isPlaying = true;
         }
       })
       .addCase(fetchTrackAudio.rejected, state => {
@@ -45,13 +58,23 @@ const slice = createSlice({
       })
       .addCase(fetchLikedTracks.pending, state => {
         state.isLoading = true;
+        state.currentTracks = [];
       })
       .addCase(fetchLikedTracks.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.currentTracks = action.payload;
         state.likedTracks = action.payload;
       })
       .addCase(fetchLikedTracks.rejected, state => {
         state.isLoading = false;
+      })
+      .addCase(fetchTracksByPlaylist.pending, state => {
+        state.isLoading = true;
+        state.currentTracks = [];
+      })
+      .addCase(fetchTracksByPlaylist.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentTracks = action.payload;
       })
       .addCase(markTrackAsLiked.fulfilled, (state, action) => {
         const track = action.payload;
@@ -66,6 +89,7 @@ const slice = createSlice({
 
 export const {
   setIsPlaying,
+  clearCurrentTracks,
 } = slice.actions;
 
 export default slice.reducer;

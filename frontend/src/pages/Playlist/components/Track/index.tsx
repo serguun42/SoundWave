@@ -17,9 +17,9 @@ import heartOutlineSvg from '../../../../assets/player/heart_outline.svg';
 import styles from './Track.module.css';
 import { setIsPlaying } from '../../../../redux/slices/tracks';
 
-type Props = Omit<TrackType, 'owner' | 'mime_type'> & { position: number, imgSrc?: string };
+export type TrackProps = Omit<TrackType, 'owner' | 'mime_type'> & { position: number, imgSrc?: string };
 
-export function Track({ position, uuid, duration, title, artist_name: artistName, imgSrc }: Props) {
+export function Track({ position, uuid, duration, title, artist_name: artistName, imgSrc }: TrackProps) {
   const dispatch = useAppDispatch();
 
   const isTrackLiked = useSelector(isTrackLikedSelector(uuid));

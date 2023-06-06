@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-relative-packages
 import { Track } from '../../../../../backend/src/types/entities';
-import { TrackAudioInfo } from './types';
+import { TrackAudioInfo, TrackWithSrc } from './types';
 import { createAppAsyncThunk } from '../../createAppAsyncThunk';
 
 export const fetchTrackInfo = createAsyncThunk<Track, string>(
@@ -51,29 +51,37 @@ export const fetchTrackAudio = createAppAsyncThunk<TrackAudioInfo | undefined, s
   },
 );
 
-export const fetchLikedTracks = createAsyncThunk<Track[]>(
+export const fetchLikedTracks = createAsyncThunk<TrackWithSrc[]>(
   'tracks/fetchLikedTracks',
-  async (_, { rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue }) => {
     const response = await fetch('/api/v1/tracks/liked');
 
     if (!response.ok) {
       return rejectWithValue(await response.text());
     }
-    const data = await response.json();
-    return data;
+    const data: Track[] = await response.json();
+    const tracksWithSrc = await Promise.all(data.map(async item => {
+      const cover = await dispatch(fetchTrackCover(item.uuid)).unwrap();
+      return { ...item, imgSrc: cover };
+    }));
+    return tracksWithSrc;
   },
 );
 
-export const fetchTracksByPlaylist = createAsyncThunk<Track[], string>(
+export const fetchTracksByPlaylist = createAsyncThunk<TrackWithSrc[], string>(
   'tracks/fetchTracksByPlaylist',
-  async (payload, { rejectWithValue }) => {
+  async (payload, { dispatch, rejectWithValue }) => {
     const response = await fetch(`/api/v1/tracks/byPlaylist?uuid=${payload}`);
 
     if (!response.ok) {
       return rejectWithValue(await response.text());
     }
-    const data = response.json();
-    return data;
+    const data: Track[] = await response.json();
+    const tracksWithSrc = await Promise.all(data.map(async item => {
+      const cover = await dispatch(fetchTrackCover(item.uuid)).unwrap();
+      return { ...item, imgSrc: cover };
+    }));
+    return tracksWithSrc;
   },
 );
 
