@@ -20,6 +20,8 @@ import UserFromCookieToken from '../util/user-from-cookie-token.js';
 import SendFile from '../storage/send-file.js';
 import { APIMethod } from '../types/api.js';
 import { Track, UploadingTrack } from '../types/entities.js';
+import { ResponseError } from '../util/errors.js';
+import SendDefaultCover from '../storage/send-default-cover.js';
 
 export const OwnedTracks: APIMethod = ({ req, queries, cookies, sendCode, sendPayload, wrapError, endWithError }) => {
   if (req.method !== 'GET') {
@@ -89,19 +91,16 @@ export const TrackCover: APIMethod = ({ res, req, queries, sendCode, sendPayload
     return;
   }
 
-  SendFile({ res, req }, 'cover', uuid).catch(wrapError);
+  SendFile({ res, req }, 'cover', uuid)
+    .catch((e) => {
+      if (e instanceof ResponseError && e.code === 404) return SendDefaultCover({ res });
+
+      return Promise.reject(e);
+    })
+    .catch(wrapError);
 };
 
-export const TrackAudio: APIMethod = ({
-  res,
-  req,
-  cookies,
-  queries,
-  sendCode,
-  sendPayload,
-  endWithError,
-  wrapError,
-}) => {
+export const TrackAudio: APIMethod = ({ res, req, queries, sendCode, sendPayload, wrapError }) => {
   if (req.method !== 'GET') {
     sendCode(405);
     return;
@@ -113,13 +112,7 @@ export const TrackAudio: APIMethod = ({
     return;
   }
 
-  UserFromCookieToken(cookies)
-    .then((user) => {
-      if (!user) return endWithError(401);
-
-      return SendFile({ res, req }, 'audio', uuid);
-    })
-    .catch(wrapError);
+  SendFile({ res, req }, 'audio', uuid).catch(wrapError);
 };
 
 export const TracksByPlaylist: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {

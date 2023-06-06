@@ -22,6 +22,8 @@ import UserFromCookieToken from '../util/user-from-cookie-token.js';
 import SendFile from '../storage/send-file.js';
 import { APIMethod } from '../types/api.js';
 import { Playlist, PlaylistFull, PlaylistSavingPositions, UploadingPlaylist } from '../types/entities.js';
+import { ResponseError } from '../util/errors.js';
+import SendDefaultCover from '../storage/send-default-cover.js';
 
 export const OwnedPlaylists: APIMethod = ({
   req,
@@ -107,7 +109,13 @@ export const PlaylistCover: APIMethod = ({ res, req, queries, sendCode, sendPayl
     return;
   }
 
-  SendFile({ res, req }, 'cover', uuid).catch(wrapError);
+  SendFile({ res, req }, 'cover', uuid)
+    .catch((e) => {
+      if (e instanceof ResponseError && e.code === 404) return SendDefaultCover({ res });
+
+      return Promise.reject(e);
+    })
+    .catch(wrapError);
 };
 
 export const GetPlaylistFull: APIMethod = ({ req, queries, sendCode, sendPayload, wrapError }) => {
