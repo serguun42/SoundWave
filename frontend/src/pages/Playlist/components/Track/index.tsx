@@ -1,24 +1,32 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { isTrackLikedSelector } from '../../../../redux/slices/tracks/selectors';
+import {
+  isTrackLikedSelector,
+  isTrackPlayingSelector,
+  playingInfoSelector,
+} from '../../../../redux/slices/tracks/selectors';
 // eslint-disable-next-line import/no-relative-packages
 import { Track as TrackType } from '../../../../../../backend/src/types/entities';
 import { useAppDispatch } from '../../../../hooks/redux';
-import { markTrackAsLiked, markTrackAsUnliked } from '../../../../redux/slices/tracks/thunks';
+import { fetchTrackAudio, markTrackAsLiked, markTrackAsUnliked } from '../../../../redux/slices/tracks/thunks';
 import { convertSecondsToString } from '../../../../helpers';
 import playSvg from '../../../../assets/player/play.svg';
+import pauseSvg from '../../../../assets/player/pause.svg';
 import heartFillSvg from '../../../../assets/player/heart_fill.svg';
 import heartOutlineSvg from '../../../../assets/player/heart_outline.svg';
 import styles from './Track.module.css';
+import { setIsPlaying } from '../../../../redux/slices/tracks';
 
 type Props = Omit<TrackType, 'owner' | 'mime_type'> & { position: number, imgSrc?: string };
 
 export function Track({ position, uuid, duration, title, artist_name: artistName, imgSrc }: Props) {
   const dispatch = useAppDispatch();
 
-  const [isHover, setIsHover] = useState(false);
   const isTrackLiked = useSelector(isTrackLikedSelector(uuid));
-  const [isLiked, setisLiked] = useState(isTrackLiked);
+  const isPlaying = useSelector(isTrackPlayingSelector);
+  const playingInfo = useSelector(playingInfoSelector);
+  const [isHover, setIsHover] = useState(false);
+  const [isLiked, setIsLiked] = useState(isTrackLiked);
 
   const onMouseEnter = () => {
     setIsHover(true);
@@ -28,20 +36,44 @@ export function Track({ position, uuid, duration, title, artist_name: artistName
     setIsHover(false);
   };
 
+  const onPlayClick = async () => {
+    if (uuid === playingInfo.uuid) {
+      dispatch(setIsPlaying(true));
+    } else {
+      dispatch(setIsPlaying(false));
+      await dispatch(fetchTrackAudio(uuid));
+      dispatch(setIsPlaying(true));
+    }
+  };
+
+  const onPauseClick = () => {
+    dispatch(setIsPlaying(false));
+  };
+
   const onLikeClick = () => {
     dispatch(markTrackAsLiked(uuid));
-    setisLiked(true);
+    setIsLiked(true);
   };
 
   const onUnlikeClick = () => {
     dispatch(markTrackAsUnliked(uuid));
-    setisLiked(false);
+    setIsLiked(false);
+  };
+
+  const getPlayButton = () => {
+    if (isHover) {
+      if (uuid === playingInfo.uuid && isPlaying) {
+        return <img src={pauseSvg} alt="" onClick={onPauseClick} />;
+      }
+      return <img src={playSvg} alt="" onClick={onPlayClick} />;
+    }
+    return position;
   };
 
   return (
     <div className={styles.container} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <div className={styles.position_container}>
-        {isHover ? <img src={playSvg} alt="" /> : position}
+        {getPlayButton()}
       </div>
       <div className={styles.cover_container}>
         <img className={styles.cover} src={imgSrc} alt="" />

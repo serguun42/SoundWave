@@ -1,6 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 // eslint-disable-next-line import/no-relative-packages
 import { Track } from '../../../../../backend/src/types/entities';
+import { TrackAudioInfo } from './types';
+import { createAppAsyncThunk } from '../../createAppAsyncThunk';
 
 export const fetchTrackInfo = createAsyncThunk<Track, string>(
   'tracks/fetchTrackInfo',
@@ -18,18 +20,59 @@ export const fetchTrackInfo = createAsyncThunk<Track, string>(
 export const fetchTrackCover = createAsyncThunk<string, string>(
   'tracks/fetchTrackCover',
   async payload => {
-    console.log(2313);
     const response = await fetch(`/api/v1/tracks/cover?uuid=${payload}`);
+
+    if (!response.ok) return '';
     const data = await response.blob();
     return URL.createObjectURL(data);
   },
 );
 
+export const fetchTrackAudio = createAppAsyncThunk<TrackAudioInfo | undefined, string>(
+  'tracks/fetchTrackAudio',
+  async (payload, { dispatch, getState }) => {
+    const state = getState();
+    const response = await fetch(`/api/v1/tracks/audio?uuid=${payload}`);
+
+    if (!response.ok) return undefined;
+    const info = await dispatch(fetchTrackInfo(payload)).unwrap();
+    const cover = await dispatch(fetchTrackCover(payload)).unwrap();
+    const isLikedSelector = (uuid: string) => {
+      for (const track of state.tracks.likedTracks) {
+        if (track.uuid === uuid) {
+          return true;
+        }
+      }
+      return false;
+    };
+    const isLiked = isLikedSelector(payload);
+    const data = await response.blob();
+    return { src: URL.createObjectURL(data), coverSrc: cover, isLiked, ...info };
+  },
+);
+
 export const fetchLikedTracks = createAsyncThunk<Track[]>(
   'tracks/fetchLikedTracks',
-  async () => {
+  async (_, { rejectWithValue }) => {
     const response = await fetch('/api/v1/tracks/liked');
+
+    if (!response.ok) {
+      return rejectWithValue(await response.text());
+    }
     const data = await response.json();
+    return data;
+  },
+);
+
+export const fetchTracksByPlaylist = createAsyncThunk<Track[], string>(
+  'tracks/fetchTracksByPlaylist',
+  async (payload, { rejectWithValue }) => {
+    const response = await fetch(`/api/v1/tracks/byPlaylist?uuid=${payload}`);
+
+    if (!response.ok) {
+      return rejectWithValue(await response.text());
+    }
+    const data = response.json();
     return data;
   },
 );

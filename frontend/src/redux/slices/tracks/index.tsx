@@ -1,18 +1,24 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TracksState } from './types';
-import { fetchTrackCover, fetchLikedTracks, markTrackAsLiked, markTrackAsUnliked } from './thunks';
+import { fetchTrackCover, fetchLikedTracks, markTrackAsLiked, markTrackAsUnliked, fetchTrackAudio } from './thunks';
 // eslint-disable-next-line import/no-relative-packages
 
 const initialState: TracksState = {
   isLoading: false,
+  isPlaying: false,
+  isUuidLoading: false,
+  playingInfo: { src: '', coverSrc: '', isLiked: false, uuid: '', duration: 0, title: '', artist_name: '' },
   likedTracks: [],
-  currentTracks: [],
 };
 
 const slice = createSlice({
   name: 'tracks',
   initialState,
-  reducers: {},
+  reducers: {
+    setIsPlaying(state, action: PayloadAction<boolean>) {
+      state.isPlaying = action.payload;
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(fetchTrackCover.pending, state => {
@@ -22,6 +28,19 @@ const slice = createSlice({
         state.isLoading = false;
       })
       .addCase(fetchTrackCover.rejected, state => {
+        state.isLoading = false;
+      })
+      .addCase(fetchTrackAudio.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(fetchTrackAudio.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          state.playingInfo = action.payload;
+          state.isUuidLoading = false;
+        }
+      })
+      .addCase(fetchTrackAudio.rejected, state => {
         state.isLoading = false;
       })
       .addCase(fetchLikedTracks.pending, state => {
@@ -45,8 +64,8 @@ const slice = createSlice({
   },
 });
 
-// export const {
-//   isTrackLiked,
-// } = slice.actions;
+export const {
+  setIsPlaying,
+} = slice.actions;
 
 export default slice.reducer;
