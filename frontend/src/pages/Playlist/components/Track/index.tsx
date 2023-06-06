@@ -26,7 +26,6 @@ export function Track({ position, uuid, duration, title, artist_name: artistName
   const isPlaying = useSelector(isTrackPlayingSelector);
   const playingInfo = useSelector(playingInfoSelector);
   const [isHover, setIsHover] = useState(false);
-  const [isLiked, setIsLiked] = useState(isTrackLiked);
 
   const onMouseEnter = () => {
     setIsHover(true);
@@ -52,19 +51,17 @@ export function Track({ position, uuid, duration, title, artist_name: artistName
 
   const onLikeClick = () => {
     dispatch(markTrackAsLiked(uuid));
-    setIsLiked(true);
   };
 
   const onUnlikeClick = () => {
     dispatch(markTrackAsUnliked(uuid));
-    setIsLiked(false);
   };
 
   const getPlayButton = () => {
+    if (uuid === playingInfo.uuid && isPlaying) {
+      return <img src={pauseSvg} alt="" onClick={onPauseClick} />;
+    }
     if (isHover) {
-      if (uuid === playingInfo.uuid && isPlaying) {
-        return <img src={pauseSvg} alt="" onClick={onPauseClick} />;
-      }
       return <img src={playSvg} alt="" onClick={onPlayClick} />;
     }
     return position;
@@ -82,7 +79,7 @@ export function Track({ position, uuid, duration, title, artist_name: artistName
         <h3>{title}</h3>
         <span>{artistName}</span>
       </div>
-      {isLiked ?
+      {isTrackLiked ?
         <img className={styles.like} src={heartFillSvg} alt="" onClick={onUnlikeClick} /> :
         <img className={styles.like} src={heartOutlineSvg} alt="" onClick={onLikeClick} />}
       <span className={styles.time}>{convertSecondsToString(duration)}</span>
