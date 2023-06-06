@@ -3,8 +3,9 @@ export function isCookieExists(name: string) {
 }
 
 export function convertSecondsToString(time: number) {
-  const minutes = Math.trunc(time / 60);
-  let seconds = Math.round(time % 60).toString();
+  const roundedTime = Math.round(time);
+  const minutes = Math.trunc(roundedTime / 60);
+  let seconds = Math.round(roundedTime % 60).toString();
   if (seconds.length === 1) {
     seconds = `0${seconds}`;
   }

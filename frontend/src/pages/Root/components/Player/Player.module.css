@@ -9,18 +9,33 @@
 }
 
 .timeline {
+  position: relative;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   height: var(--player-timeline-height);
-  padding: 0 10px;
 
   background-color: #4D9FC466;
 }
 
 .timeline span {
+  z-index: 1;
+  margin: 0 10px;
   font-size: 0.875rem;
+}
+
+.timeline_active {
+  position: absolute;
+  left: 0;
+
+  width: 0%;
+  height: 100%;
+
+  background-color: var(--accent-color-1);
+
+  transition: width 0.3s linear;
 }
 
 .content {
@@ -81,6 +96,13 @@
   margin-left: 24px;
 }
 
+.download {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  margin-left: 16px;
+}
+
 .content_center_container {
   display: flex;
   gap: 16px;
@@ -89,14 +111,16 @@
 
 .content_center_container img {
   cursor: pointer;
-  z-index: 2;
   width: 24px;
   height: 24px;
 }
 
 .volume_container {
   position: relative;
+  z-index: 2;
+
   justify-self: end;
+
   width: 24px;
   height: 24px;
 }

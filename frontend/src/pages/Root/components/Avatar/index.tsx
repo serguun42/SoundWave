@@ -1,3 +1,7 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../../../hooks/redux';
+import { logout } from '../../../../redux/slices/auth/thunks';
 import defaultPng from '../../../../assets/header/default_avatar.png';
 import styles from './Avatar.module.css';
 
@@ -15,10 +19,32 @@ export function Avatar() {
     </svg>
   );
 
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+
+  const onClick = () => {
+    setIsMenuVisible(prev => !prev);
+  };
+
+  const onLogoutClick = async () => {
+    const response = await dispatch(logout()).unwrap();
+    if (response.ok) {
+      setIsMenuVisible(false);
+      navigate('/auth');
+    }
+  };
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={onClick}>
       <img src={defaultPng} alt="Avatar" />
       <div className={styles.arrow}>{arrow}</div>
+      {isMenuVisible && (
+        <div className={styles.menu}>
+          <div onClick={onLogoutClick}>Log out</div>
+        </div>
+      )}
     </div>
   );
 }

@@ -45,3 +45,20 @@ export const register = createAsyncThunk<undefined, LoginRegisterPayload>(
     return undefined;
   },
 );
+
+type LogoutType = {
+  ok: string;
+};
+
+export const logout = createAsyncThunk<LogoutType>(
+  'auth/logout',
+  async () => {
+    const response = await fetch('/api/v1/account/logout', { method: 'POST' });
+
+    if (!response.ok) {
+      return { ok: false };
+    }
+    const data = await response.json();
+    return data;
+  },
+);
