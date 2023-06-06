@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   display: flex;
   gap: 8px;
   align-items: center;
@@ -24,4 +25,35 @@
 .arrow {
   width: 24px;
   height: 24px;
+}
+
+.menu {
+  position: absolute;
+  top: 55px;
+  right: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 160px;
+  padding: 10px;
+
+  background-color: white;
+  border-radius: 10px;
+}
+
+.menu div {
+  display: flex;
+  justify-content: center;
+
+  width: 100%;
+  padding: 10px;
+
+  font-weight: 500;
+
+  border-radius: 10px;
+}
+
+.menu div:hover {
+  background-color: var(--background-color-3);
 }

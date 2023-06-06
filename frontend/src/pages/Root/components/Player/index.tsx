@@ -10,9 +10,15 @@ import skipNextSvg from '../../../../assets/player/skip_next.svg';
 import volumeMuteSvg from '../../../../assets/player/volume_mute.svg';
 import volumeLowSvg from '../../../../assets/player/volume_low.svg';
 import volumeHighSvg from '../../../../assets/player/volume_high.svg';
+import downloadSvg from '../../../../assets/player/download.svg';
 import styles from './Player.module.css';
 import { useAppDispatch } from '../../../../hooks/redux';
-import { fetchTrackAudio, markTrackAsLiked, markTrackAsUnliked } from '../../../../redux/slices/tracks/thunks';
+import {
+  downloadTrack,
+  fetchTrackAudio,
+  markTrackAsLiked,
+  markTrackAsUnliked,
+} from '../../../../redux/slices/tracks/thunks';
 import {
   canSkipNextSelector,
   canSkipPreviousSelector,
@@ -26,22 +32,31 @@ import { convertSecondsToString } from '../../../../helpers';
 export function Player() {
   const dispatch = useAppDispatch();
 
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const volumeRef = useRef<HTMLInputElement>(null);
   const playingInfo = useSelector(playingInfoSelector);
   const isPlaying = useSelector(isTrackPlayingSelector);
   const canSkipPrevious = useSelector(canSkipPreviousSelector);
   const canSkipNext = useSelector(canSkipNextSelector);
   const currentTracks = useSelector(currentTracksSelector);
 
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const timelineActiveRef = useRef<HTMLDivElement>(null);
+  const volumeRef = useRef<HTMLInputElement>(null);
   const [currentTime, setCurrentTime] = useState('0:00');
   const [isLiked, setIsLiked] = useState(false);
+  const [isVolumeHover, setIsVolumeHover] = useState(false);
+  const [volumeImage, setVolumeImage] = useState<string>(volumeLowSvg);
 
   const onTimeUpdate = () => {
-    if (audioRef.current) {
-      setCurrentTime(convertSecondsToString(audioRef.current.currentTime));
+    if (audioRef.current && timelineActiveRef.current) {
+      const { currentTime } = audioRef.current;
+      setCurrentTime(convertSecondsToString(currentTime));
+      timelineActiveRef.current.style.width = `${(currentTime / playingInfo.duration) * 100}%`;
     }
   };
+
+  useEffect(() => {
+    setIsLiked(playingInfo.isLiked);
+  }, [playingInfo.isLiked]);
 
   const onLikeClick = () => {
     dispatch(markTrackAsLiked(playingInfo.uuid));
@@ -53,12 +68,8 @@ export function Player() {
     setIsLiked(false);
   };
 
-  const onPlayClick = () => {
-    if (isPlaying) {
-      dispatch(setIsPlaying(false));
-    } else {
-      dispatch(setIsPlaying(true));
-    }
+  const onDownloadTrack = () => {
+    dispatch(downloadTrack(playingInfo.uuid));
   };
 
   useEffect(() => {
@@ -69,42 +80,11 @@ export function Player() {
     }
   }, [isPlaying]);
 
-  useEffect(() => {
-    setIsLiked(playingInfo.isLiked);
-  }, [playingInfo.isLiked]);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.5;
-    }
-  }, [audioRef.current]);
-
-  const [isVolumeHover, setIsVolumeHover] = useState(false);
-
-  const onMouseEnter = () => {
-    setIsVolumeHover(true);
-  };
-
-  const onMouseLeave = () => {
-    setIsVolumeHover(false);
-  };
-
-  const [volumeImage, setVolumeImage] = useState<string>(volumeLowSvg);
-
-  const onVolumeChange = () => {
-    if (volumeRef.current && audioRef.current) {
-      const percent = Number(volumeRef.current.value) - 1;
-      volumeRef.current.style.background = `linear-gradient(90deg, #4D9FC4 ${percent}%, #BACED980 ${percent}%)`;
-
-      audioRef.current.volume = Number(volumeRef.current.value) / 100;
-
-      if (audioRef.current.volume === 0) {
-        setVolumeImage(volumeMuteSvg);
-      } else if (audioRef.current.volume >= 0.7) {
-        setVolumeImage(volumeHighSvg);
-      } else {
-        setVolumeImage(volumeLowSvg);
-      }
+  const onPlayClick = () => {
+    if (isPlaying) {
+      dispatch(setIsPlaying(false));
+    } else {
+      dispatch(setIsPlaying(true));
     }
   };
 
@@ -128,10 +108,42 @@ export function Player() {
     }
   };
 
+  const onMouseEnter = () => {
+    setIsVolumeHover(true);
+  };
+
+  const onMouseLeave = () => {
+    setIsVolumeHover(false);
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+    }
+  }, [audioRef.current]);
+
+  const onVolumeChange = () => {
+    if (volumeRef.current && audioRef.current) {
+      const percent = Number(volumeRef.current.value) - 1;
+      volumeRef.current.style.background = `linear-gradient(90deg, #4D9FC4 ${percent}%, #BACED980 ${percent}%)`;
+
+      audioRef.current.volume = Number(volumeRef.current.value) / 100;
+
+      if (audioRef.current.volume === 0) {
+        setVolumeImage(volumeMuteSvg);
+      } else if (audioRef.current.volume >= 0.7) {
+        setVolumeImage(volumeHighSvg);
+      } else {
+        setVolumeImage(volumeLowSvg);
+      }
+    }
+  };
+
   return (
     <section className={styles.container}>
       <audio src={playingInfo.src} ref={audioRef} onTimeUpdate={onTimeUpdate} />
       <div className={styles.timeline}>
+        <div className={styles.timeline_active} ref={timelineActiveRef} />
         <span>{currentTime}</span>
         <span>{convertSecondsToString(playingInfo.duration)}</span>
       </div>
@@ -147,6 +159,7 @@ export function Player() {
           {isLiked ?
             <img className={styles.like} src={heartFillSvg} alt="" onClick={onUnlikeClick} /> :
             <img className={styles.like} src={heartOutlineSvg} alt="" onClick={onLikeClick} />}
+          <img className={styles.download} src={downloadSvg} alt="" onClick={onDownloadTrack} />
         </div>
         <div className={styles.content_center_container}>
           <img src={skipPreviousSvg} alt="" onClick={onSkipPrevious} />

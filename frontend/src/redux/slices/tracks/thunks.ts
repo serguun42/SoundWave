@@ -31,12 +31,10 @@ export const fetchTrackCover = createAsyncThunk<string, string>(
 export const fetchTrackAudio = createAppAsyncThunk<TrackAudioInfo | undefined, string>(
   'tracks/fetchTrackAudio',
   async (payload, { dispatch, getState }) => {
-    const state = getState();
-    const response = await fetch(`/api/v1/tracks/audio?uuid=${payload}`);
-
-    if (!response.ok) return undefined;
     const info = await dispatch(fetchTrackInfo(payload)).unwrap();
     const cover = await dispatch(fetchTrackCover(payload)).unwrap();
+
+    const state = getState();
     const isLikedSelector = (uuid: string) => {
       for (const track of state.tracks.likedTracks) {
         if (track.uuid === uuid) {
@@ -46,8 +44,8 @@ export const fetchTrackAudio = createAppAsyncThunk<TrackAudioInfo | undefined, s
       return false;
     };
     const isLiked = isLikedSelector(payload);
-    const data = await response.blob();
-    return { src: URL.createObjectURL(data), coverSrc: cover, isLiked, ...info };
+
+    return { src: `/api/v1/tracks/audio?uuid=${payload}`, coverSrc: cover, isLiked, ...info };
   },
 );
 
@@ -119,5 +117,23 @@ export const markTrackAsUnliked = createAsyncThunk<string, string>(
       return rejectWithValue(await response.text());
     }
     return payload;
+  },
+);
+
+export const downloadTrack = createAsyncThunk<undefined, string>(
+  'tracks/downloadTrack',
+  async payload => {
+    const response = await fetch(`/api/v1/tracks/audio?uuid=${payload}`);
+
+    if (payload) {
+      const blob = await response.blob();
+      const link = document.createElement('a');
+      link.download = 'track';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    return undefined;
   },
 );
