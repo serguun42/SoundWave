@@ -24,7 +24,7 @@ export function Playlists({ title, playlists }: Props) {
   const [cards, setCards] = useState<JSX.Element[]>();
 
   useEffect(() => {
-    const loadTracks = async () => {
+    const loadCards = async () => {
       const items = await Promise.all(playlists.map(async item => {
         const imageUrl = await dispatch(fetchPlaylistCover(item.uuid)).unwrap();
         return (
@@ -39,7 +39,7 @@ export function Playlists({ title, playlists }: Props) {
       }));
       setCards(items);
     };
-    loadTracks();
+    loadCards();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

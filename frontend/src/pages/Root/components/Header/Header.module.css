@@ -45,3 +45,60 @@
 .search_container input::placeholder {
   color: var(--font-color-3);
 }
+
+.search_results_container {
+  cursor: auto;
+
+  position: absolute;
+  top: 60px;
+  left: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  padding: 8px;
+
+  background-color: white;
+  border-radius: 14px;
+}
+
+.search_result {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.search_result:hover {
+  cursor: pointer;
+  background-color: var(--background-color-3);
+}
+
+.search_result img {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+}
+
+.title_container {
+  margin-left: 12px;
+}
+
+.title_container h4 {
+  font-weight: 600;
+  color: var(--font-color-1);
+}
+
+.title_container span {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--font-color-2);
+}
+
+.search_result_time {
+  margin-left: auto;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--font-color-2);
+}

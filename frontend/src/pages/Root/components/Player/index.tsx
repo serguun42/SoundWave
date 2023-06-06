@@ -12,8 +12,14 @@ import volumeLowSvg from '../../../../assets/player/volume_low.svg';
 import volumeHighSvg from '../../../../assets/player/volume_high.svg';
 import styles from './Player.module.css';
 import { useAppDispatch } from '../../../../hooks/redux';
-import { markTrackAsLiked, markTrackAsUnliked } from '../../../../redux/slices/tracks/thunks';
-import { isTrackPlayingSelector, playingInfoSelector } from '../../../../redux/slices/tracks/selectors';
+import { fetchTrackAudio, markTrackAsLiked, markTrackAsUnliked } from '../../../../redux/slices/tracks/thunks';
+import {
+  canSkipNextSelector,
+  canSkipPreviousSelector,
+  currentTracksSelector,
+  isTrackPlayingSelector,
+  playingInfoSelector,
+} from '../../../../redux/slices/tracks/selectors';
 import { setIsPlaying } from '../../../../redux/slices/tracks';
 import { convertSecondsToString } from '../../../../helpers';
 
@@ -24,6 +30,9 @@ export function Player() {
   const volumeRef = useRef<HTMLInputElement>(null);
   const playingInfo = useSelector(playingInfoSelector);
   const isPlaying = useSelector(isTrackPlayingSelector);
+  const canSkipPrevious = useSelector(canSkipPreviousSelector);
+  const canSkipNext = useSelector(canSkipNextSelector);
+  const currentTracks = useSelector(currentTracksSelector);
 
   const [currentTime, setCurrentTime] = useState('0:00');
   const [isLiked, setIsLiked] = useState(false);
@@ -99,6 +108,26 @@ export function Player() {
     }
   };
 
+  const onSkipPrevious = () => {
+    if (canSkipPrevious) {
+      for (let i = 0; i < currentTracks.length; i++) {
+        if (playingInfo.uuid === currentTracks[i].uuid) {
+          dispatch(fetchTrackAudio(currentTracks[i - 1].uuid));
+        }
+      }
+    }
+  };
+
+  const onSkipNext = () => {
+    if (canSkipNext) {
+      for (let i = 0; i < currentTracks.length; i++) {
+        if (playingInfo.uuid === currentTracks[i].uuid) {
+          dispatch(fetchTrackAudio(currentTracks[i + 1].uuid));
+        }
+      }
+    }
+  };
+
   return (
     <section className={styles.container}>
       <audio src={playingInfo.src} ref={audioRef} onTimeUpdate={onTimeUpdate} />
@@ -120,9 +149,9 @@ export function Player() {
             <img className={styles.like} src={heartOutlineSvg} alt="" onClick={onLikeClick} />}
         </div>
         <div className={styles.content_center_container}>
-          <img src={skipPreviousSvg} alt="" />
+          <img src={skipPreviousSvg} alt="" onClick={onSkipPrevious} />
           <img src={isPlaying ? pauseSvg : playSvg} alt="" onClick={onPlayClick} />
-          <img src={skipNextSvg} alt="" />
+          <img src={skipNextSvg} alt="" onClick={onSkipNext} />
         </div>
         <div className={styles.volume_container} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
           <img className={styles.volume} src={volumeImage} alt="" />
