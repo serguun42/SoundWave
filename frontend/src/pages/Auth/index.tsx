@@ -16,7 +16,7 @@ export function Auth() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const emailInputRef = useRef<InputHandle>(null);
+  const usernameInputRef = useRef<InputHandle>(null);
   const passwordInputRef = useRef<InputHandle>(null);
   const confirmPasswordInputRef = useRef<InputHandle>(null);
   const selectedTab = useSelector(selectedTabSelector);
@@ -36,7 +36,7 @@ export function Auth() {
   };
 
   const onLoginButtonClick = async () => {
-    const username = emailInputRef.current?.value();
+    const username = usernameInputRef.current?.value();
     const password = passwordInputRef.current?.value();
     if (username && password) {
       loginAndRedirect(username, password);
@@ -44,7 +44,7 @@ export function Auth() {
   };
 
   const onSignupButtonClick = async () => {
-    const username = emailInputRef.current?.value();
+    const username = usernameInputRef.current?.value();
     const password = passwordInputRef.current?.value();
     const confirmPassword = confirmPasswordInputRef.current?.value();
     if (username && password && confirmPassword && password === confirmPassword) {
@@ -56,7 +56,7 @@ export function Auth() {
   const loginContent = (
     <>
       <div className={styles.inputs_container}>
-        <Input type="email" title="Email address" placeholder="Your email" ref={emailInputRef} />
+        <Input title="Username" placeholder="Your username" ref={usernameInputRef} />
         <Input type="password" title="Password" placeholder="Password" ref={passwordInputRef} />
       </div>
       <Button text="Log in" onClick={onLoginButtonClick} />
@@ -66,7 +66,7 @@ export function Auth() {
   const signupContent = (
     <>
       <div className={styles.inputs_container}>
-        <Input type="email" title="Email address" placeholder="Your email" ref={emailInputRef} />
+        <Input title="Username" placeholder="Your username" ref={usernameInputRef} />
         <Input type="password" title="Password" placeholder="Password" ref={passwordInputRef} />
         <Input type="password" title="Confirm Password" placeholder="Confirm Password" ref={confirmPasswordInputRef} />
       </div>

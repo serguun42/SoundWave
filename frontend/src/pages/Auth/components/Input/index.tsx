@@ -4,7 +4,7 @@ import eyeShowSvg from '../../../../assets/auth/eye_show.svg';
 import styles from './Input.module.css';
 
 type Props = {
-  type: 'email' | 'password';
+  type?: 'password';
   title?: string;
   placeholder?: string;
 };
@@ -13,7 +13,7 @@ export type InputHandle = {
   value: () => string | undefined;
 };
 
-export const Input = forwardRef<InputHandle, Props>(function Input({ type, title, placeholder }, ref) {
+export const Input = forwardRef<InputHandle, Props>(function Input({ type = 'text', title, placeholder }, ref) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isPasswordShow, setIsPasswordShow] = useState(false);
 
@@ -28,15 +28,7 @@ export const Input = forwardRef<InputHandle, Props>(function Input({ type, title
         inputElement.setSelectionRange(end, end);
       };
 
-      if (inputElement.getAttribute('type') === 'email') {
-        inputElement.setAttribute('type', 'text');
-        setFocus();
-        setTimeout(() => {
-          inputElement.setAttribute('type', 'email');
-        }, 0);
-      } else {
-        setFocus();
-      }
+      setFocus();
     }
   };
 
