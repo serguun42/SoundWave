@@ -35,68 +35,18 @@ export function Playlist() {
   };
 
   useEffect(() => {
-    const lal = () => {
-      console.log(89389128932198);
-      // let loadTracks = () => {};
-      // dispatch(clearCurrentTracks());
-      // setTracks(undefined);
+    if (type) {
       switch (type) {
         case PlaylistType.likedTracks: {
           dispatch(fetchLikedTracks());
-          // if (likedTracks.length === 0) {
-          //   dispatch(fetchLikedTracks());
-          // } else {
-          //   loadTracks = async () => {
-          //     const items = await Promise.all(likedTracks.map(async (item, index) => {
-          //       const imageUrl = await dispatch(fetchTrackCover(item.uuid)).unwrap();
-          //       return (
-          //         <Track
-          //           key={item.uuid}
-          //           position={index + 1}
-          //           uuid={item.uuid}
-          //           duration={item.duration}
-          //           title={item.title}
-          //           artist_name={item.artist_name}
-          //           imgSrc={imageUrl}
-          //         />
-          //       );
-          //     }));
-          //     setTracks(items);
-          //     findTrackPosition();
-          //   };
-          // }
           break;
         }
         default: {
-          // if (type) {
-          //   loadTracks = async () => {
-          //     const tracks = await dispatch(fetchTracksByPlaylist(type)).unwrap();
-          //     const items = await Promise.all(tracks.map(async (item, index) => {
-          //       const imageUrl = await dispatch(fetchTrackCover(item.uuid)).unwrap();
-          //       return (
-          //         <Track
-          //           key={item.uuid}
-          //           position={index + 1}
-          //           uuid={item.uuid}
-          //           duration={item.duration}
-          //           title={item.title}
-          //           artist_name={item.artist_name}
-          //           imgSrc={imageUrl}
-          //         />
-          //       );
-          //     }));
-          //     setTracks(items);
-          //   };
-          // }
-          if (type) {
-            dispatch(fetchTracksByPlaylist(type));
-          }
+          dispatch(fetchTracksByPlaylist(type));
           break;
         }
       }
-    };
-    lal();
-    // loadTracks();
+    }
   }, [dispatch, type]);
 
   useEffect(() => {
